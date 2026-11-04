@@ -1,4 +1,4 @@
-const CACHE = "fsw-invoice-v1";
+const CACHE = "fsw-invoice-v2";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 const LIB = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
 
