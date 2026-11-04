@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fancy Steel Works – Invoice Maker</title>
+<meta name="theme-color" content="#3b2a8c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{--bg:#f4f3fa;--card:#fff;--tx:#1b1b2f;--mut:#666;--bd:#cfcde6;--ac:#3b2a8c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141f;--card:#1f1e2d;--tx:#eceaf8;--mut:#a09db8;--bd:#3a3856;--ac:#9a8cff}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px system-ui,Arial,sans-serif}
+.ui{max-width:900px;margin:auto;padding:10px}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tabs button,.btn{background:var(--card);color:var(--tx);border:1px solid var(--bd);padding:9px 14px;border-radius:8px;font-size:14px;cursor:pointer}
+.tabs button.on,.btn.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:10px}
+.card h3{margin:0 0 8px;font-size:15px;color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+label{font-size:12px;color:var(--mut);display:block}
+input,select,textarea{width:100%;padding:8px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font-size:14px}
+.it{display:grid;grid-template-columns:2fr 1fr .7fr .8fr auto;gap:6px;margin-bottom:6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.list div{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:center}
+.hide{display:none}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}
+@media(max-width:600px){.it{grid-template-columns:1fr 1fr 1fr auto}.it input:first-child{grid-column:1/-1}}
+#wrap{overflow:hidden;background:#fff;padding:22px;width:838px;margin:auto}
+/* ---- bill ---- */
+.bill{width:794px;margin:auto;background:#fff;color:#2b2185;border:2px solid #1a1260;font:12.5px Arial,Helvetica,sans-serif;position:relative}
+.bill *{box-sizing:border-box}
+.bill .v{color:#111;font-weight:600}
+.bill .s{position:relative;border-bottom:2.5px solid #1a1260}
+.bill .a{position:absolute;white-space:nowrap}
+.bill .br{border-right:2.5px solid #1a1260}
+.bill .dl{flex:1;border-bottom:1.5px dotted #1a1260;min-height:14px;font-style:normal;white-space:nowrap;overflow:hidden}
+.bill .gs{display:flex;border:2px solid #1a1260;height:100%}.bill .gs span{flex:1;border-right:1.5px solid #1a1260;text-align:center;font:600 13px/33px Arial;color:#111}.bill .gs span:last-child{border:0}
+.bill table{border-collapse:collapse;width:100%;table-layout:fixed}
+.bill th,.bill td{border:2px solid #1a1260;padding:2px 5px;vertical-align:top}
+.bill th{font-weight:600;text-align:center;height:61px;vertical-align:middle}
+.bill td{height:58px;color:#111;font-weight:600;font-size:14px}
+.bill th:first-child,.bill td:first-child{border-left:0}.bill th:last-child,.bill td:last-child{border-right:0}.bill tr:first-child th{border-top:0}.bill tr:last-child td{border-bottom:0}
+.bill .rt{text-align:right}
+.bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
+@media print{@page{size:A4;margin:3mm}body{background:#fff}.ui{display:none!important}#wrap{zoom:.93!important;padding:0!important;background:none!important;width:794px!important}.bill{margin:0 auto}}
+</style><style>body.start .ui:not(#start),body.start #wrap{display:none}body:not(.start) #start{display:none}#start{padding-top:24px}#start .card{padding:16px}#start h3{font-size:18px;margin-bottom:12px}#start .g{grid-template-columns:1fr;gap:12px}#start .btn{width:100%;padding:12px}</style></head><body class="start">
+<div id="start" class="ui"><div class="card"><h3>New bill</h3><div class="g"><div><label>Invoice No.</label><input id="s_inv"></div><div><label>Vehicle Number</label><input id="s_vn" style="text-transform:uppercase" autocomplete="off"></div><div><label>Location</label><select id="s_grp"></select></div><div><label>Business name</label><select id="s_csel"></select></div></div><h3 style="margin:18px 0 8px;font-size:15px">Items</h3><div id="s_items"></div><button class="btn" id="s_addi" style="margin-top:6px">+ Add item</button><div style="margin-top:12px"><label>Add: Charge if any (₹)</label><input id="s_chg" type="number" step="any"></div><div class="row"><button class="btn pri" id="snext">Next</button></div></div></div>
+<div class="ui">
+<div class="tabs"><button class="on" data-t="new">New Bill</button><button data-t="saved">Saved Bills</button><button data-t="cust">Customers</button><button data-t="prod">Products</button></div>
+
+<div id="p-new">
+<div class="card"><h3>Location &amp; business</h3><div class="g"><div><label>Location</label><select id="grp"></select></div><div><label>Business name</label><select id="csel"></select></div></div></div>
+<div class="card"><h3>Bill details</h3><div class="g">
+<div><label>Invoice No.</label><input id="inv"></div>
+<div><label>Invoice Date (= date of supply)</label><input id="date" type="date"></div>
+<div style="display:none"><label>Reverse Charge</label><select id="rev"><option value="">Y/N (leave as printed)</option><option>N</option><option>Y</option></select></div>
+<div style="display:none"><label>Transportation Mode</label><input id="tm"></div>
+<div><label>Vehicle Number</label><input id="vn"></div>
+
+<div><label>Place of Supply</label><input id="ps"></div>
+<div style="display:none"><label>Tax type</label><select id="tx"><option value="auto">Auto (by buyer state)</option><option value="intra">CGST + SGST</option><option value="inter">IGST</option></select></div>
+</div></div>
+
+<div class="card"><h3>Receiver (Billed to)</h3><div class="g">
+<div><label>Name</label><input id="bn" list="cl" autocomplete="off"></div>
+<div><label>Address</label><input id="ba"></div>
+<div><label>GSTIN (15)</label><input id="bg" maxlength="15" style="text-transform:uppercase"></div>
+<div><label>State</label><input id="bs" list="sl"></div>
+<div><label>State Code</label><input id="bc" maxlength="2"></div></div>
+<input type="checkbox" id="same" checked hidden><div style="margin-top:8px;color:var(--mut)">Consignee (Shipped to) prints as “Same”</div>
+<div id="cons" class="g hide" style="margin-top:8px">
+<div><label>Name</label><input id="cn"></div><div><label>Address</label><input id="ca"></div>
+<div><label>GSTIN</label><input id="cg" maxlength="15" style="text-transform:uppercase"></div>
+<div><label>State</label><input id="cs" list="sl"></div><div><label>State Code</label><input id="cc" maxlength="2"></div></div>
+</div>
+
+<div class="card"><h3>Items</h3><div id="items"></div>
+<button class="btn" id="addi">+ Add item</button>
+<div class="g" style="margin-top:10px"><div><label>Add: Charge if any (₹)</label><input id="chg" type="number" step="any"></div></div></div>
+
+<details class="card" style="display:none"><summary>Bank details printed on bill (edit if changed)</summary><div class="g" style="margin-top:8px"><div><label>Bank</label><input id="bk"></div><div><label>A/c No.</label><input id="bka"></div><div><label>IFSC</label><input id="bki"></div></div></details>
+<div class="row" style="margin:0 0 10px">
+<button class="btn pri" id="save">Save bill</button><button class="btn" id="print">Print / PDF</button><button class="btn" id="png">Download image</button><button class="btn" id="reset">New blank bill</button></div>
+</div>
+
+<div id="p-saved" class="hide"><div class="card"><input id="q" placeholder="Search by invoice no. or customer"><div class="list" id="bl" style="margin-top:8px"></div></div></div>
+<div id="p-cust" class="hide"><div class="card"><h3>Add / edit customer</h3><div class="g"><div><label>Name</label><input id="kn"></div><div><label>Address</label><input id="ka"></div><div><label>GSTIN</label><input id="kg" maxlength="15" style="text-transform:uppercase"></div><div><label>State</label><input id="ks" list="sl"></div><div><label>State Code</label><input id="kc" maxlength="2"></div><div><label>Place of Supply</label><input id="kp"></div><div><label>Location (e.g. Aliganj)</label><input id="kgrp" list="gl"></div><datalist id="gl"></datalist><div><label>Tax</label><select id="kt"><option value="auto">Auto (by state code)</option><option value="intra">CGST 9% + SGST 9%</option><option value="inter">IGST 18%</option></select></div></div><div class="row"><button class="btn pri" id="ksave">Save customer</button></div></div><div class="card"><div class="list" id="cl2"></div></div><div class="card"><h3>Import / export customers</h3><p style="margin:0 0 8px;color:var(--mut)">The built-in list loads automatically. Add or edit customers above; use this box to bulk-import, or to copy the current list out as JSON.</p><label>Choose a customers.json file</label><input type="file" id="cfile" accept=".json,application/json"><label style="margin-top:8px">or paste JSON</label><textarea id="cj" rows="4"></textarea><div class="row"><button class="btn" id="cimp">Import pasted JSON</button><button class="btn" id="cexp">Show current list as JSON</button></div></div><div class="card"><h3>Backup (customers, products, bills)</h3><textarea id="bj" rows="5"></textarea><div class="row"><button class="btn" id="bshow">Show backup</button><button class="btn" id="brest">Restore from text</button></div></div></div>
+<div id="p-prod" class="hide"><div class="card"><h3>Add / edit product</h3><div class="g"><div><label>Name</label><input id="pn"></div><div><label>HSN</label><input id="ph"></div><div><label>Default rate (optional)</label><input id="pr" type="number" step="any"></div></div><div class="row"><button class="btn pri" id="psave">Save product</button></div></div><div class="card"><div class="list" id="pl"></div></div></div>
+<datalist id="cl"></datalist><datalist id="sl"></datalist><datalist id="il"></datalist>
+<h3 style="margin:4px 2px;color:var(--ac)">Bill preview</h3>
+</div>
+<div id="ov" class="hide" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9;overflow:auto;padding:12px;text-align:center"><button class="btn pri" onclick="this.parentNode.classList.add('hide')">Close</button><p style="color:#fff">Press and hold the image to save or share it</p><img id="ovi" style="max-width:100%;background:#fff"></div>
+<div id="wrap"><div class="bill" id="bill"></div></div>
+
+<!-- BUILT-IN CUSTOMER LIST: one array per Location. Edit or add here, or send the updated list to Claude. -->
+<script id="seed" type="application/json">
+{
+ "Aliganj": [
+  {
+   "name": "FOJI BUILDING MATERAILS",
+   "address": "0, KASHIRAM, ALIGANJ, Etah, Uttar Pradesh, 207247",
+   "gstin": "09BUBPK0503J1ZX",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Aliganj"
+  },
+  {
+   "name": "SHAKYA BUILDING MATERIAL",
+   "address": "0, SARAI ROAD, ALIGANJ, Etah, Uttar Pradesh, 207247",
+   "gstin": "09CWMPS2075P2ZH",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Aliganj"
+  },
+  {
+   "name": "M/S HIND STEEL TRADERS",
+   "address": "0, MOH-NAZAF ALI,KILA ROAD, ALIGANJ, Etah, Uttar Pradesh, 207247",
+   "gstin": "09AGGPA9873P1ZL",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Aliganj"
+  },
+  {
+   "name": "CHIEF ENTERPRISES",
+   "address": "0, MOH- KASHIRAM, ALIGANJ, Etah, Uttar Pradesh, 207247",
+   "gstin": "09BQGPM3537D1ZV",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Aliganj"
+  },
+  {
+   "name": "M/S HIND HARDWARE AND SANITARY STORE",
+   "address": "0, MEWATIYAN SARAI ROAD, ALIGANJ, Etah, Uttar Pradesh, 207247",
+   "gstin": "09DDPPK4836M1ZQ",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Aliganj"
+  }
+ ],
+ "Dehradun": [
+  {
+   "name": "M/S I K FABRICATIONS",
+   "address": "Khasra No.48, Raipur Road Jankidas Road, Agarwal Chunna Bhatta Old Dallanwala, Adhoiwala, Dehradun, Dehradun, Uttarakhand, 248001",
+   "gstin": "05AAYPI4994B1ZC",
+   "state": "Uttarakhand",
+   "stateCode": "05",
+   "placeOfSupply": "Dehradun"
+  },
+  {
+   "name": "APPOLO FABRICATION",
+   "address": "150, Chunna Bhatta Raipur Road, Near Reema Enterprise, Adhoiwala, Dehradun, Dehradun, Uttarakhand, 248001",
+   "gstin": "05DBYPA8490L1ZV",
+   "state": "Uttarakhand",
+   "stateCode": "05",
+   "placeOfSupply": "Dehradun"
+  },
+  {
+   "name": "BHARAT FABRICATION",
+   "address": "BHRAMANWALA, MEHBOOB, DEHRADUN, Dehradun, Uttarakhand, 248001",
+   "gstin": "05ANPPY9590B1ZC",
+   "state": "Uttarakhand",
+   "stateCode": "05",
+   "placeOfSupply": "Dehradun"
+  },
+  {
+   "name": "M/S N.K. WOODWORK & CONTRACTOR",
+   "address": "0, raksha vihar, raipur road, sahastradhar crossing, Dehradun, Uttarakhand, 248001",
+   "gstin": "05ADZPH4687C1Z6",
+   "state": "Uttarakhand",
+   "stateCode": "05",
+   "placeOfSupply": "Dehradun"
+  }
+ ],
+ "Tulsipur": [
+  {
+   "name": "SIDDHARTH IRON STORE",
+   "address": "ITWA CHAURAHA, PURWA, TULSIPUR, Balrampur, Uttar Pradesh, 271208",
+   "gstin": "09AWOPG7597E1ZW",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Tulsipur"
+  },
+  {
+   "name": "M/S SHAKTI IRON STORE",
+   "address": "0, NAI BAZAR TULSIPUR, BALRAMPUR, Balrampur, Uttar Pradesh, 271201",
+   "gstin": "09AVFPG4820N1ZC",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Tulsipur"
+  }
+ ],
+ "Farrukhabad": [
+  {
+   "name": "PAPPU TRADERS",
+   "address": "1, NARKASA, KADRIGATE, Farrukhabad, Uttar Pradesh, 209625",
+   "gstin": "09EHSPP5471H1ZJ",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Farrukhabad"
+  },
+  {
+   "name": "M/S RAJEEV KUMAR DWIVEDI IRON DELAR",
+   "address": "NARKSA ROAD, KADRI GATE, FARRUKHABAD, Unnao, Uttar Pradesh, 209625",
+   "gstin": "09BBKPK9864N1ZL",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Farrukhabad"
+  }
+ ],
+ "Shahjahanpur": [
+  {
+   "name": "M/S JAWI UALLA TIMBER",
+   "address": "1, MIRANPUR KATRA SHAHJAHANPUR, SHAHAJHANPUR, Shahjahanpur, Uttar Pradesh, 242301",
+   "gstin": "09AANPU3662K1ZX",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Shahjahanpur"
+  },
+  {
+   "name": "7K TRADERS",
+   "address": "SHAHJAHANPUR ROAD, NEAR BHARAT PETROLEUM CORPORATION LIMITED, Shahjahanpur, Shahjahanpur, Uttar Pradesh, 242001",
+   "gstin": "09EGMPA5321Q1ZY",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Shahjahanpur"
+  },
+  {
+   "name": "M/S MAHA LAXMI TRADERS",
+   "address": "-, RAFIYABAD KALAN, SHAHJAHANPUR, Shahjahanpur, Uttar Pradesh, 242127",
+   "gstin": "09BPIPG0817B1ZC",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Shahjahanpur"
+  }
+ ],
+ "Fatehpur": [
+  {
+   "name": "RAMENDRA IRON STORE",
+   "address": "WORD NO 16, LOHAI BAZAR KHAGA, FATEHPUR, Fatehpur, Uttar Pradesh, 212655",
+   "gstin": "09EQVPK9337P1ZG",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Fatehpur"
+  },
+  {
+   "name": "M/S MANISH ENTERPRISES",
+   "address": "RADHA NAGAR, RADHA NAGAR, GAZIPUR ROAD, BAXPUR, Fatehpur, Fatehpur, Uttar Pradesh, 212601",
+   "gstin": "09DDAPK7868E1Z8",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Fatehpur"
+  },
+  {
+   "name": "M/S VIDYA ENTERPRISES",
+   "address": "BAXPUR RADHA NAGAR FATEHPUR, BAXPUR RADHA NAGAR FATEHPUR, BAXPUR RADHA NAGAR FATEHPUR, Fatehpur, Uttar Pradesh, 212601",
+   "gstin": "09BHVPD8126P1ZG",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Fatehpur"
+  },
+  {
+   "name": "MAA SHARDA TRADERS",
+   "address": "123, Unnamed Road, State Bank of India, JHAUPUR NALE KE PAS, Radha Nagar, Fatehpur, Uttar Pradesh, 212601",
+   "gstin": "09DDRPG5045L1ZZ",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Fatehpur"
+  }
+ ],
+ "Kaushambi": [
+  {
+   "name": "M/S KESHARWANI TRADERS",
+   "address": "KASIYA PURV, MUATGANJ, KAUSHAMBI, Kaushambi, Uttar Pradesh, 212201",
+   "gstin": "09AMWPB0287G1ZS",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Kaushambi"
+  },
+  {
+   "name": "M/S SONU PLYWOOD AND HARDWARE",
+   "address": "1, MAHMOODPUR, MAHMOODPUR, Kaushambi, Uttar Pradesh, 212208",
+   "gstin": "09CIHPK3432K1Z2",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Kaushambi"
+  }
+ ],
+ "Sultanpur": [
+  {
+   "name": "M/S MUNNA SENTERY AND IRON STORE",
+   "address": "0, SISAUDA, MAHMOODPUR, ., SEMRI BAZAR, Sultanpur, Uttar Pradesh, 228142",
+   "gstin": "09ACXPE6007G1ZF",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Sultanpur"
+  },
+  {
+   "name": "M/S VERMA TRADERS",
+   "address": "MUNGAR, SULTANPUR, MUNGAR, Sultanpur, Uttar Pradesh, 228141",
+   "gstin": "09AFOPL2790P1ZI",
+   "state": "Uttar Pradesh",
+   "stateCode": "09",
+   "placeOfSupply": "Sultanpur"
+  }
+ ]
+}
+</script>
+<script>
+const $=id=>document.getElementById(id);
+const ST="Jammu and Kashmir:01,Himachal Pradesh:02,Punjab:03,Chandigarh:04,Uttarakhand:05,Haryana:06,Delhi:07,Rajasthan:08,Uttar Pradesh:09,Bihar:10,Sikkim:11,Arunachal Pradesh:12,Nagaland:13,Manipur:14,Mizoram:15,Tripura:16,Meghalaya:17,Assam:18,West Bengal:19,Jharkhand:20,Odisha:21,Chhattisgarh:22,Madhya Pradesh:23,Gujarat:24,Maharashtra:27,Karnataka:29,Goa:30,Kerala:32,Tamil Nadu:33,Telangana:36,Andhra Pradesh:37".split(",").map(s=>s.split(":"));
+$("sl").innerHTML=ST.map(s=>`<option value="${s[0]}">`).join("");
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let bills=store.get("fsw_bills",[]),custs=store.get("fsw_custs",{}),itemsDb=store.get("fsw_items",{}),items=[{}];
+(function(){try{const S=JSON.parse(document.getElementById("seed").textContent),h=String(JSON.stringify(S).split("").reduce((a,c)=>(a*31+c.charCodeAt(0))|0,7));
+if(store.get("fsw_seedv","")!==h){Object.keys(S).forEach(g=>S[g].forEach(x=>{const o=custs[x.name]||{};custs[x.name]={a:x.address||"",g:(x.gstin||"").toUpperCase(),s:x.state||"",c:x.stateCode||"",p:x.placeOfSupply||o.p||"",t:o.t||"auto",grp:g}}));store.set("fsw_custs",custs);store.set("fsw_seedv",h)}}catch(e){}})();
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>n?(+n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2}):"";
+const dmy=d=>d?d.split("-").reverse().join("/"):"";
+function words(n){const a="Zero One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen Fifteen Sixteen Seventeen Eighteen Nineteen".split(" "),b="  Twenty Thirty Forty Fifty Sixty Seventy Eighty Ninety".split(" ");
+const two=x=>x<20?a[x]:b[Math.floor(x/10)]+(x%10?" "+a[x%10]:"");
+const three=x=>(x>99?a[Math.floor(x/100)]+" Hundred"+(x%100?" ":""):"")+(x%100?two(x%100):"");
+function w(x){if(!x)return"";let s="",c=Math.floor(x/1e7),l=Math.floor(x/1e5)%100,t=Math.floor(x/1e3)%100,h=x%1000;
+if(c)s+=three(c)+" Crore ";if(l)s+=two(l)+" Lakh ";if(t)s+=two(t)+" Thousand ";if(h)s+=three(h);return s.trim()}
+const r=Math.floor(n),p=Math.round((n-r)*100);if(!r&&!p)return"";
+return "Rupees "+(w(r)||"Zero")+(p?" and "+two(p)+" Paise":"")+" Only"}
+const val=id=>$(id).value.trim();
+function getBill(){const same=$("same").checked;
+return{inv:val("inv"),date:val("date"),rev:val("rev"),tm:val("tm"),vn:val("vn"),ds:val("date"),ps:val("ps"),tx:val("tx"),chg:+val("chg")||0,same,
+b:{n:val("bn"),a:val("ba"),g:val("bg").toUpperCase(),s:val("bs"),c:val("bc")},
+c:same?null:{n:val("cn"),a:val("ca"),g:val("cg").toUpperCase(),s:val("cs"),c:val("cc")},items:items.filter(i=>i.q||i.r)}}
+function calc(B){const sub=B.items.reduce((s,i)=>s+(+i.q||0)*(+i.r||0),0),base=sub+B.chg;
+let m=B.tx;if(m==="auto")m=(B.b.c||"09")==="09"?"intra":"inter";
+const cg=m==="intra"?base*.09:0,sg=cg,ig=m==="inter"?base*.18:0,tax=cg+sg+ig;return{sub,base,m,cg,sg,ig,tax,tot:base+tax}}
+function gsBox(g){return`<div class="gs">${[...Array(15)].map((_,i)=>`<span>${esc(g[i]||"")}</span>`).join("")}</div>`}
+function party(p,t,cp){const row=(top,inner,extra)=>`<div class="a" style="left:8px;right:8px;top:${top}px;${extra||""}">${inner}</div>`,fl="display:flex;gap:6px;align-items:baseline";
+return row(t[0],`<span>Name :</span><i class="dl v">${esc(p.n)}</i>`,fl)+
+row(t[1],`<span>Address</span><i class="dl v" style="white-space:normal;font-size:11px;line-height:14px;max-height:30px">${esc(p.a)}</i>`,fl)+
+row(t[2],`<span>GSTIN :</span><div style="flex:1;height:100%">${gsBox(p.g||"")}</div>`,"height:36px;display:flex;gap:6px;align-items:center")+
+row(t[3],`State : <span class="v">${esc(p.s)}</span>`)+
+`<div class="a" style="left:${cp}%;top:${t[3]}px">State Code: <span class="v">${esc(p.c)}</span></div>`}
+function rr(label,val,top){return`<div class="a" style="left:8px;right:6px;top:${top}px;display:flex;gap:4px;align-items:baseline"><span>${label}</span><i class="dl v">${esc(val)}</i></div>`}
+function T(l,v,h){return`<div class="tr" style="height:${h}px"><span style="width:70%;border-right:2px solid #1a1260;font-weight:600">${l}</span><span class="v" style="flex:1;justify-content:flex-end">${v}</span></div>`}
+function render(){const B=getBill(),C=calc(B),con=B.c||{n:"",a:"Same",g:"",s:"",c:""};
+const rows=Math.max(4,B.items.length);let tr="";
+for(let i=0;i<rows;i++){const it=B.items[i];const amt=it?(+it.q||0)*(+it.r||0):0;
+tr+=`<tr><td style="text-align:center">${it?i+1:""}</td><td>${it?esc(it.n):""}</td><td>${it?esc(it.h):""}</td><td class="rt">${it?esc(it.q):""}</td><td class="rt">${it&&it.r?fmt(it.r):""}</td><td class="rt">${amt?fmt(amt):""}</td></tr>`}
+const F="font-family:'Century Schoolbook','Bookman Old Style',Georgia,serif",L="#1a1260";
+$("bill").innerHTML=`<div class="s" style="height:86px"><svg width="100%" height="58" viewBox="0 0 790 58" style="display:block"><text x="55" y="48" textLength="671" lengthAdjust="spacingAndGlyphs" style="${F}" font-weight="700" font-size="64" fill="#2b2185">FANCY STEEL WORKS</text></svg><svg width="100%" height="28" viewBox="0 0 790 28" style="display:block"><text x="112" y="21" textLength="557" lengthAdjust="spacingAndGlyphs" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="21" fill="#2b2185">G.T. ROAD, DEOBAND (SAHARANPUR) M: 9897012107</text></svg></div>
+<div class="s" style="height:39px"><div class="a" style="left:10px;top:9px;font:700 19px Arial">GSTIN: 09CGFPS8637E1ZX</div><div class="a" style="left:40%;top:4px;font:700 28px Arial">Tax Invoice</div><div class="a" style="left:72%;top:3px;font-size:9.5px;line-height:11px">White &nbsp;&nbsp;&nbsp; Original for Recipient<br>Pink &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Duplicate for Supplier/Transporter<br>Yellow &nbsp;&nbsp; Triplicate for Supplier</div></div>
+<div class="s" style="height:144px;display:flex"><div class="br" style="width:56%;position:relative">
+<div class="a" style="left:8px;top:18px">Invoice No.: <span class="v">${esc(B.inv)}</span></div><div class="a" style="left:60%;top:16px">Invoice Date <span class="v">${dmy(B.date)}</span></div>
+<div class="a" style="left:8px;top:70px">Reverse Charge: ${B.rev?`<span class="v">${B.rev}</span>`:"Y/N"}</div>
+<div class="a" style="left:8px;top:118px">State : <span class="v">Uttar Pradesh</span></div><div class="a" style="left:73%;top:116px">State Code : 09</div></div>
+<div style="flex:1;position:relative">${rr("Transportation Mode",B.tm,10)}${rr("Vehicle Number",B.vn,45)}${rr("Date of Supply",dmy(B.date),77)}${rr("Place of Supply",B.ps,111)}</div></div>
+<div class="s" style="height:25px"><div class="a" style="left:17.8%;top:7px;font:600 10px Arial">Details of Receiver | Billed to:</div><div class="a" style="left:67%;top:6px;font:600 10px Arial">Details of Consignee | Shipped to:</div></div>
+<div class="s" style="height:189px;display:flex"><div class="br" style="width:64%;position:relative">${party(B.b,[30,79,117,170],59)}</div><div style="flex:1;position:relative">${party(con,[26,74,113,166],54)}</div></div>
+<table style="border:0"><colgroup><col style="width:4%"><col style="width:50%"><col style="width:10.5%"><col style="width:13%"><col style="width:10.5%"><col style="width:12%"></colgroup><tr><th>Sr.<br>No.</th><th>Name of Product / Service</th><th>HSN<br>ACS</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>${tr}</table>
+<div style="display:flex;height:383px;border-top:2.5px solid ${L}">
+<div class="br" style="width:65.5%;display:flex;flex-direction:column">
+<div class="s" style="height:153px"><div class="a" style="left:0;right:0;top:8px;text-align:center;font-weight:600;font-size:12px">Total Invoice Amount in Words:</div><div class="a v" style="left:12px;right:12px;top:44px;height:90px;white-space:normal;font-size:13px;line-height:44px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 42px,${L} 42px,${L} 44px)">${words(Math.floor(C.tot))}</div></div>
+<div class="s" style="height:78px;font-size:15.5px"><div class="a" style="left:12px;top:11px">Bank Details:</div><div class="a v" style="left:31.6%;top:8px">${esc($("bk").value)}</div><div class="a" style="left:12px;top:32px">Bank A/c No:</div><div class="a v" style="left:31.6%;top:30px">${esc($("bka").value)}</div><div class="a" style="left:12px;top:53px">IFSC:</div><div class="a v" style="left:31.6%;top:51px">${esc($("bki").value)}</div></div>
+<div style="flex:1;display:flex"><div class="br" style="width:75%;position:relative;padding:7px 8px;font-size:11px;line-height:13.5px"><b style="font-weight:600">Terms and Conditions :</b><br>(1) We shall not be responsible for the goods after given to the transport Co./Railway.<br>(2) Goods once sold shall not be taken back or exchanged.<br>(3) All Disputes Subject to Deoband Jurisdiction Only.<b class="a" style="right:8px;bottom:5px;font-weight:600">E.&amp;O.E.</b></div><div style="flex:1;position:relative"><span class="a" style="left:0;right:0;bottom:5px;text-align:center;font-size:8.5px">(Common Seal)</span></div></div></div>
+<div style="flex:1;position:relative">${T("Total Amount Before Tax",fmt(C.base-B.chg),28)}${T("Add: Charge if any",fmt(B.chg),32)}${T("Add: CGST@ &nbsp;9%",fmt(C.cg),33)}${T("Add: SGST@ &nbsp;9%",fmt(C.sg),35)}${T("Add: IGST @ &nbsp;18%",fmt(C.ig),39)}${T("Total Tax Amount GST",fmt(C.tax),33)}${T("Total Amount After Tax :",fmt(C.tot),44)}${T("GST Payable on Reverse Charge",B.rev==="Y"?fmt(C.tax):"",25)}
+<div style="position:relative;height:114px"><div class="a" style="left:0;right:0;top:4px;text-align:center;font-size:8.5px">Certified that the particulars given above are true and correct.</div><div class="a" style="left:0;right:0;top:19px;text-align:center;font:700 16px/20px Georgia,serif">For Fancy Steel Works</div><div class="a" style="left:0;right:0;bottom:8px;text-align:center;font:700 9.5px Arial">Authorised Signatory</div></div></div></div>`;fit()}
+function fit(){const w=$("wrap"),z=Math.min(1.5,innerWidth/838);w.style.zoom=z}
+addEventListener("resize",fit);
+
+function drawItems(){drawItems0();$("s_items").innerHTML=$("items").innerHTML}function drawItems0(){$("items").innerHTML=items.map((it,i)=>`<div class="it"><input placeholder="Product / service" list="il" data-i="${i}" data-k="n" value="${esc(it.n)}"><input placeholder="HSN" data-i="${i}" data-k="h" value="${esc(it.h)}"><input placeholder="Qty" type="number" step="any" data-i="${i}" data-k="q" value="${esc(it.q)}"><input placeholder="Rate" type="number" step="any" data-i="${i}" data-k="r" value="${esc(it.r)}"><button class="btn" data-d="${i}">✕</button></div>`).join("");
+$("il").innerHTML=Object.keys(itemsDb).map(n=>`<option value="${esc(n)}">`).join("")}
+["items","s_items"].forEach(id=>$(id).addEventListener("input",e=>{const t=e.target,i=t.dataset.i;if(i==null)return;items[i][t.dataset.k]=t.value;
+if(t.dataset.k==="n"&&itemsDb[t.value]&&!items[i].r){items[i].h=itemsDb[t.value].h;items[i].r=itemsDb[t.value].r;drawItems();e.currentTarget.querySelector(`[data-i="${i}"][data-k="q"]`).focus()}render()}));
+["items","s_items"].forEach(id=>$(id).addEventListener("click",e=>{const d=e.target.dataset.d;if(d==null)return;items.splice(d,1);if(!items.length)items=[{}];drawItems();render()}));
+$("addi").onclick=$("s_addi").onclick=()=>{items.push({...DI});drawItems()};
+const AB={UP:"09",UK:"05",HR:"06",DL:"07",PB:"03",RJ:"08",HP:"02",MP:"23",MH:"27",GJ:"24",BR:"10",WB:"19"};function stateCode(sId,cId){const ab=AB[val(sId).toUpperCase()];if(ab){$(cId).value=ab;return}const s=ST.find(x=>x[0].toLowerCase()===val(sId).toLowerCase());if(s)$(cId).value=s[1]}
+$("bs").addEventListener("input",()=>stateCode("bs","bc"));$("cs").addEventListener("input",()=>stateCode("cs","cc"));
+$("bn").addEventListener("input",()=>{const c=custs[val("bn")];if(c){$("ba").value=c.a;$("bg").value=c.g;$("bs").value=c.s;$("bc").value=c.c;$("ps").value=c.p||"";$("tx").value=c.t||"auto";render()}});
+$("same").onchange=()=>{$("cons").classList.toggle("hide",$("same").checked);render()};
+document.querySelectorAll(".ui input,.ui select").forEach(e=>e.addEventListener("input",render));
+function nextNo(){let m=0;bills.forEach(b=>{const n=parseInt((b.inv.match(/(\d+)\s*$/)||[])[1]||0);if(n>m)m=n});return"FSW/"+String(m+1).padStart(3,"0")}
+function blank(){items=[{...DI}];["bn","ba","bg","bs","bc","cn","ca","cg","cs","cc","tm","vn","ps","chg"].forEach(i=>$(i).value="");
+$("inv").value=nextNo();$("date").value=new Date().toISOString().slice(0,10);$("rev").value="";$("tx").value="auto";$("same").checked=true;$("cons").classList.add("hide");drawItems();render()}
+function load(B){const set=(i,v)=>$(i).value=v??"";set("inv",B.inv);set("date",B.date);set("rev",B.rev);set("tm",B.tm);set("vn",B.vn);set("ps",B.ps);set("tx",B.tx);set("chg",B.chg||"");
+set("bn",B.b.n);set("ba",B.b.a);set("bg",B.b.g);set("bs",B.b.s);set("bc",B.b.c);$("same").checked=B.same;$("cons").classList.toggle("hide",B.same);
+if(B.c){set("cn",B.c.n);set("ca",B.c.a);set("cg",B.c.g);set("cs",B.c.s);set("cc",B.c.c)}items=B.items.length?B.items.map(x=>({...x})):[{}];drawItems();render();tab("new");scrollTo(0,0)}
+$("save").onclick=()=>{const B=getBill();if(!B.inv||!B.b.n){alert("Enter invoice number and receiver name");return}
+B.total=calc(B).tot;const i=bills.findIndex(x=>x.inv===B.inv);i>=0?bills[i]=B:bills.push(B);store.set("fsw_bills",bills);
+if(!custs[B.b.n])custs[B.b.n]={a:B.b.a,g:B.b.g,s:B.b.s,c:B.b.c,p:B.ps,t:B.tx,grp:val("grp")};store.set("fsw_custs",custs);
+lists();drawItems();alert("Saved "+B.inv)};
+$("print").onclick=()=>print();
+$("png").onclick=()=>{if(!window.html2canvas){alert("Image export unavailable; use Print / PDF");return}const w=$("wrap"),z=w.style.zoom;w.style.zoom=1;
+html2canvas($("wrap"),{scale:2,backgroundColor:"#fff"}).then(c=>{w.style.zoom=z;$("ovi").src=c.toDataURL("image/png");$("ov").classList.remove("hide")}).catch(()=>{w.style.zoom=z;alert("Could not make the image")})};
+$("reset").onclick=blank;
+function lists(){$("cl").innerHTML=Object.keys(custs).map(n=>`<option value="${esc(n)}">`).join("");
+const q=val("q").toLowerCase();$("bl").innerHTML=bills.slice().reverse().filter(b=>(b.inv+b.b.n).toLowerCase().includes(q)).map(b=>`<div><span><b>${esc(b.inv)}</b> · ${esc(b.b.n)}<br><small style="color:var(--mut)">${dmy(b.date)} · ₹${fmt(b.total)}</small></span><span><button class="btn" data-o="${esc(b.inv)}">Open</button> <button class="btn" data-x="${esc(b.inv)}">Delete</button></span></div>`).join("")||"No saved bills yet";
+$("cl2").innerHTML=Object.keys(custs).map(n=>`<div><span><b>${esc(n)}</b><br><small style="color:var(--mut)">${esc(custs[n].a)} ${esc(custs[n].g)}</small></span><button class="btn" data-c="${esc(n)}">Delete</button></div>`).join("")||"Customers are saved automatically when you save a bill"}
+$("q").oninput=lists;
+$("bl").addEventListener("click",e=>{const o=e.target.dataset.o,x=e.target.dataset.x;if(o)load(bills.find(b=>b.inv===o));if(x&&confirm("Delete "+x+"?")){bills=bills.filter(b=>b.inv!==x);store.set("fsw_bills",bills);lists()}});
+$("cl2").addEventListener("click",e=>{const c=e.target.dataset.c;if(c&&confirm("Delete "+c+"?")){delete custs[c];store.set("fsw_custs",custs);lists()}});
+function tab(t){document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));["new","saved","cust","prod"].forEach(x=>$("p-"+x).classList.toggle("hide",x!==t))}
+document.querySelector(".tabs").addEventListener("click",e=>{if(e.target.dataset.t){tab(e.target.dataset.t);lists()}});
+const DI={n:"Iron Doors",h:"7308"};const bk=store.get("fsw_bank",{b:"Punjab National Bank",a:"6217002100001824",i:"PUNB0621700"});$("bk").value=bk.b;$("bka").value=bk.a;$("bki").value=bk.i;["bk","bka","bki"].forEach(k=>$(k).addEventListener("input",()=>store.set("fsw_bank",{b:$("bk").value,a:$("bka").value,i:$("bki").value})));if(!Object.keys(itemsDb).length){itemsDb={"Iron Doors":{h:"7308",r:""}};store.set("fsw_items",itemsDb)}
+const _l=lists;lists=function(){_l();
+$("cl2").innerHTML=Object.keys(custs).map(n=>`<div><span><b>${esc(n)}</b><br><small style="color:var(--mut)">${esc(custs[n].a)} · ${esc(custs[n].g)} · ${esc(custs[n].p||"")} · ${esc(custs[n].grp||"")}</small></span><span><button class="btn" data-e="${esc(n)}">Edit</button> <button class="btn" data-c="${esc(n)}">Delete</button></span></div>`).join("")||"No customers yet";
+$("pl").innerHTML=Object.keys(itemsDb).map(n=>`<div><span><b>${esc(n)}</b><br><small style="color:var(--mut)">HSN ${esc(itemsDb[n].h)} ${itemsDb[n].r?"· ₹"+esc(itemsDb[n].r):""}</small></span><span><button class="btn" data-e="${esc(n)}">Edit</button> <button class="btn" data-p="${esc(n)}">Delete</button></span></div>`).join("")||"No products yet";
+$("il").innerHTML=Object.keys(itemsDb).map(n=>`<option value="${esc(n)}">`).join("")};
+function fillSel(){const g=$("grp").value,gs=[...new Set(Object.values(custs).map(c=>c.grp).filter(Boolean))].sort();
+$("grp").innerHTML='<option value="">— choose location —</option>'+gs.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");$("grp").value=gs.includes(g)?g:"";
+$("gl").innerHTML=gs.map(x=>`<option value="${esc(x)}">`).join("");
+const L=$("grp").value,ns=L?Object.keys(custs).filter(k=>custs[k].grp===L).sort():[],cur=$("csel").value;
+$("csel").innerHTML='<option value="">'+(L?"— choose business name —":"choose location first")+'</option>'+ns.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");$("csel").disabled=!L;$("csel").value=ns.includes(cur)?cur:"";
+$("cl").innerHTML=(L?ns:Object.keys(custs).sort()).map(n=>`<option value="${esc(n)}">`).join("")}
+const _l2=lists;lists=function(){_l2();fillSel()};
+$("grp").onchange=fillSel;
+$("csel").onchange=()=>{if(!$("csel").value)return;$("bn").value=$("csel").value;$("bn").dispatchEvent(new Event("input",{bubbles:true}))};
+$("ks").addEventListener("input",()=>stateCode("ks","kc"));
+$("ksave").onclick=()=>{const n=val("kn");if(!n){alert("Enter customer name");return}custs[n]={a:val("ka"),g:val("kg").toUpperCase(),s:val("ks"),c:val("kc"),p:val("kp"),t:val("kt"),grp:val("kgrp")};store.set("fsw_custs",custs);["kn","ka","kg","ks","kc","kp","kgrp"].forEach(i=>$(i).value="");$("kt").value="auto";lists()};
+$("cl2").addEventListener("click",e=>{const n=e.target.dataset.e;if(n){const c=custs[n];$("kn").value=n;$("ka").value=c.a||"";$("kg").value=c.g||"";$("ks").value=c.s||"";$("kc").value=c.c||"";$("kp").value=c.p||"";$("kgrp").value=c.grp||"";$("kt").value=c.t||"auto";scrollTo(0,0)}});
+$("psave").onclick=()=>{const n=val("pn");if(!n){alert("Enter product name");return}itemsDb[n]={h:val("ph"),r:val("pr")};store.set("fsw_items",itemsDb);["pn","ph","pr"].forEach(i=>$(i).value="");lists()};
+$("pl").addEventListener("click",e=>{const d=e.target.dataset,n=d.e||d.p;if(!n)return;if(d.e){$("pn").value=n;$("ph").value=itemsDb[n].h||"";$("pr").value=itemsDb[n].r||"";scrollTo(0,0)}else if(confirm("Delete "+n+"?")){delete itemsDb[n];store.set("fsw_items",itemsDb);lists()}});
+function importC(txt){try{let d=JSON.parse(txt);d=d.customers||d;let n=0,list=[];Object.keys(d).forEach(k=>{if(Array.isArray(d[k]))d[k].forEach(x=>{if(x&&x.name)list.push([x.name,x,k])});else list.push([k,d[k]||{},""])});list.forEach(([k,x,pl])=>{const c={a:x.a??x.address,g:x.g??x.gstin,s:x.s??x.state,c:x.c??x.stateCode,p:x.p??x.placeOfSupply,t:x.t??x.tax,grp:pl||x.grp},o=custs[k]||{};custs[k]={a:c.a||"",g:(c.g||"").toUpperCase(),s:c.s||"",c:c.c||"",p:c.p||o.p||"",grp:c.grp||o.grp||"",t:(c.t&&c.t!=="auto")?c.t:(o.t||"auto")};n++});store.set("fsw_custs",custs);lists();alert(n+" customers imported (same names were updated, nothing else was removed)")}catch(e){alert("That is not valid customer JSON")}}
+$("cimp").onclick=()=>importC($("cj").value);
+$("cexp").onclick=()=>{const o={};Object.keys(custs).sort().forEach(n=>{const c=custs[n],g=c.grp||"Other";(o[g]=o[g]||[]).push({name:n,address:c.a,gstin:c.g,state:c.s,stateCode:c.c,placeOfSupply:c.p||""})});$("cj").value=JSON.stringify(o,null,2)};
+$("cfile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>importC(r.result);r.readAsText(f);e.target.value=""};
+$("bshow").onclick=()=>{$("bj").value=JSON.stringify({customers:custs,products:itemsDb,bills})};
+$("brest").onclick=()=>{try{const d=JSON.parse($("bj").value);if(!confirm("Replace current data with this backup?"))return;custs=d.customers||{};itemsDb=d.products||{};bills=d.bills||[];store.set("fsw_custs",custs);store.set("fsw_items",itemsDb);store.set("fsw_bills",bills);lists();blank();alert("Restored")}catch(e){alert("That text is not a valid backup")}};
+lists();blank();
+
+function fillSC(){const L=$("s_grp").value,ns=L?Object.keys(custs).filter(k=>custs[k].grp===L).sort():[];$("s_csel").innerHTML='<option value="">'+(L?"— choose business name —":"choose location first")+'</option>'+ns.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");$("s_csel").disabled=!L}
+$("s_grp").onchange=fillSC;
+function showStart(){$("s_inv").value=$("inv").value;$("s_vn").value="";$("s_chg").value="";drawItems();$("s_grp").innerHTML=$("grp").innerHTML;$("s_grp").value=$("grp").value;fillSC();document.body.classList.add("start");scrollTo(0,0)}
+$("snext").onclick=()=>{$("inv").value=val("s_inv");$("vn").value=val("s_vn").toUpperCase();$("grp").value=$("s_grp").value;fillSel();if(val("s_csel")){$("csel").value=$("s_csel").value;$("csel").dispatchEvent(new Event("change"))}$("date").value=new Date().toISOString().slice(0,10);if(val("s_chg"))$("chg").value=val("s_chg");drawItems();document.body.classList.remove("start");render();scrollTo(0,0)};
+$("reset").onclick=()=>{blank();showStart()};
+const _ld=load;load=function(B){document.body.classList.remove("start");_ld(B)};
+showStart();
+</script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
+</body></html>
