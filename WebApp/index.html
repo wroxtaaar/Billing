@@ -29,7 +29,7 @@ input,select,textarea{width:100%;padding:8px;border:1px solid var(--bd);border-r
 .list div{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);align-items:center}
 .hide{display:none}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}
-@media(max-width:600px){.it{grid-template-columns:repeat(3,minmax(0,1fr)) auto}.it select:first-child{grid-column:1/-1}.it input,.it select{min-width:0}.it button{grid-column:auto}}
+@media(max-width:900px){.it{display:flex;flex-wrap:wrap;align-items:center}.it select[data-k="n"]{flex:0 0 100%;width:100%;min-width:0}.it input[data-k="h"]{flex:1 1 24%;min-width:0}.it input[data-k="q"]{flex:1 1 20%;min-width:0}.it input[data-k="r"]{flex:2 1 35%;min-width:0}.it button{flex:0 0 48px}}
 #wrap{overflow:hidden;background:#F6E8C8;padding:22px;width:838px;margin:auto}
 /* ---- bill ---- */
 .bill{width:794px;margin:auto;background:#F6E8C8;color:#2b2185;border:2px solid #1a1260;font:13.5px Arial,Helvetica,sans-serif;position:relative}
@@ -438,5 +438,5 @@ $("snext").onclick=()=>{$("inv").value=val("s_inv");$("vn").value=val("s_vn").to
 $("reset").onclick=()=>{blank();showStart()};
 const _ld=load;load=function(B){document.body.classList.remove("start");_ld(B)};
 showStart();
-</script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
+</script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))</script>
 </body></html>
