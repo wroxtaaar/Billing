@@ -33,16 +33,16 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 /* ---- bill ---- */
 .bill{width:794px;margin:auto;background:#fff;color:#2b2185;border:2px solid #1a1260;font:13.5px Arial,Helvetica,sans-serif;position:relative}
 .bill *{box-sizing:border-box}
-.bill .v{color:#c00000;font-weight:700;text-align:center}
+.bill .v{color:#c00000;font-weight:700;text-align:center}.bill .a .v{color:#c00000;text-align:center}
 .bill .s{position:relative;border-bottom:2.5px solid #1a1260}
 .bill .a{position:absolute;white-space:nowrap}
 .bill .br{border-right:2.5px solid #1a1260}
-.bill .dl{flex:1;border-bottom:1.5px dotted #1a1260;min-height:16px;font-style:normal;white-space:nowrap;overflow:hidden;text-align:center;font-size:14px}
+.bill .dl{flex:1;border-bottom:1.5px dotted #1a1260;min-height:16px;font-style:normal;white-space:nowrap;overflow:hidden;text-align:center;font-size:15.5px}
 .bill .gs{display:flex;border:2px solid #1a1260;height:100%}.bill .gs span{flex:1;border-right:1.5px solid #1a1260;text-align:center;font:700 14px/33px Arial;color:#c00000}.bill .gs span:last-child{border:0}
 .bill table{border-collapse:collapse;width:100%;table-layout:fixed}
 .bill th,.bill td{border:2px solid #1a1260;padding:2px 5px;vertical-align:top}
 .bill th{font-weight:600;text-align:center;height:61px;vertical-align:middle}
-.bill td{height:58px;color:#c00000;font-weight:700;font-size:15px;text-align:center;vertical-align:middle}
+.bill td{height:58px;color:#c00000;font-weight:700;font-size:17px;text-align:center!important;vertical-align:middle}
 .bill th:first-child,.bill td:first-child{border-left:0}.bill th:last-child,.bill td:last-child{border-right:0}.bill tr:first-child th{border-top:0}.bill tr:last-child td{border-bottom:0}
 .bill .rt{text-align:center}
 .bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
@@ -347,7 +347,7 @@ function T(l,v,h){return`<div class="tr" style="height:${h}px"><span style="widt
 function render(){const B=getBill(),C=calc(B),con=B.c||{n:"",a:"Same",g:"",s:"",c:""};
 const rows=Math.max(4,B.items.length);let tr="";
 for(let i=0;i<rows;i++){const it=B.items[i];const amt=it?(+it.q||0)*(+it.r||0):0;
-tr+=`<tr><td style="text-align:center">${it?i+1:""}</td><td>${it?esc(it.n):""}</td><td>${it?esc(it.h):""}</td><td class="rt">${it?esc(it.q):""}</td><td class="rt">${it&&it.r?fmt(it.r):""}</td><td class="rt">${amt?fmt(amt):""}</td></tr>`}
+tr+=`<tr><td style="text-align:center!important">${it?i+1:""}</td><td style="text-align:center!important;color:#c00000;font-size:17px">${it?esc(it.n):""}</td><td style="text-align:center!important;color:#c00000;font-size:17px">${it?esc(it.h):""}</td><td style="text-align:center!important;color:#c00000;font-size:17px">${it?esc(it.q):""}</td><td style="text-align:center!important;color:#c00000;font-size:17px">${it&&it.r?fmt(it.r):""}</td><td style="text-align:center!important;color:#c00000;font-size:17px">${amt?fmt(amt):""}</td></tr>`}
 const F="font-family:'Century Schoolbook','Bookman Old Style',Georgia,serif",L="#1a1260";
 $("bill").innerHTML=`<div class="s" style="height:86px"><svg width="100%" height="58" viewBox="0 0 790 58" style="display:block"><text x="55" y="48" textLength="671" lengthAdjust="spacingAndGlyphs" style="${F}" font-weight="700" font-size="64" fill="#2b2185">FANCY STEEL WORKS</text></svg><svg width="100%" height="28" viewBox="0 0 790 28" style="display:block"><text x="112" y="21" textLength="557" lengthAdjust="spacingAndGlyphs" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="21" fill="#2b2185">G.T. ROAD, DEOBAND (SAHARANPUR) M: 9897012107</text></svg></div>
 <div class="s" style="height:39px"><div class="a" style="left:10px;top:9px;font:700 19px Arial">GSTIN: 09CGFPS8637E1ZX</div><div class="a" style="left:40%;top:4px;font:700 28px Arial">Tax Invoice</div><div class="a" style="left:72%;top:3px;font-size:9.5px;line-height:11px">White &nbsp;&nbsp;&nbsp; Original for Recipient<br>Pink &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Duplicate for Supplier/Transporter<br>Yellow &nbsp;&nbsp; Triplicate for Supplier</div></div>
