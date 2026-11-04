@@ -327,7 +327,7 @@ const three=x=>(x>99?a[Math.floor(x/100)]+" Hundred"+(x%100?" ":""):"")+(x%100?t
 function w(x){if(!x)return"";let s="",c=Math.floor(x/1e7),l=Math.floor(x/1e5)%100,t=Math.floor(x/1e3)%100,h=x%1000;
 if(c)s+=three(c)+" Crore ";if(l)s+=two(l)+" Lakh ";if(t)s+=two(t)+" Thousand ";if(h)s+=three(h);return s.trim()}
 const r=Math.floor(n),p=Math.round((n-r)*100);if(!r&&!p)return"";
-return "Rupees "+(w(r)||"Zero")+(p?" and "+two(p)+" Paise":"")+" Only"}
+return (w(r)||"Zero")+(p?" and "+two(p)+" Paise":"")+" Only"}
 const val=id=>$(id).value.trim();
 function getBill(){const same=$("same").checked;
 return{inv:val("inv"),date:val("date"),rev:val("rev"),tm:val("tm"),vn:val("vn"),ds:val("date"),ps:val("ps"),tx:val("tx"),chg:+val("chg")||0,same,
