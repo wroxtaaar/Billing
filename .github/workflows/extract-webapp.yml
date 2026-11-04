@@ -22,7 +22,6 @@ jobs:
           mkdir -p /tmp/fancy-steel-web
           unzip -q WebApp/FancySteelInvoice-webapp.zip -d /tmp/fancy-steel-web
           cp -a /tmp/fancy-steel-web/webapp/. WebApp/
-          rm WebApp/FancySteelInvoice-webapp.zip
       - name: Commit extracted files
         run: |
           git config user.name "github-actions[bot]"
