@@ -1,11 +1,25 @@
-Fancy Steel Invoice - installable web app (PWA)
+Fancy Steel Works - Invoice Maker (PWA)
 
-Files: index.html, manifest.webmanifest, sw.js, icons/ (3 PNGs)
+Run locally:
+- Open this folder with any static web server.
+- For example: python3 -m http.server 8000
+- Visit http://localhost:8000
+- Do not open index.html using file:// if you want PWA installation/offline support.
 
-1. Upload the whole folder to any HTTPS static host, keeping the structure:
-   - Netlify: app.netlify.com/drop  (drag the folder)
-   - GitHub Pages, Cloudflare Pages, Firebase Hosting also work
-   (Opening index.html straight from the phone's storage will NOT install as an app; it must be on https.)
-2. Open the URL in Chrome on Android -> menu -> "Install app" / "Add to Home screen".
-3. Works offline after the first visit. Data is saved in that browser on that phone.
-To ship an update, upload the new files and bump CACHE in sw.js (fsw-invoice-v2).
+Deploy on Render:
+- This is a static site; no backend, Node install, or build step is required.
+- Repository: https://github.com/wroxtaaar/Billing
+- Branch: main
+- Publish directory: WebApp
+- Build command: echo "No build step required"
+- The root render.yaml contains the Render Blueprint configuration.
+
+Install on Android:
+- Open the HTTPS site in Chrome.
+- Use the browser menu -> Install app / Add to Home screen.
+- The service worker caches the app shell for offline use after the first visit.
+
+Data and privacy:
+- Bills, customers, and products are stored in the browser's localStorage on that device/browser.
+- Data is not uploaded to a server and does not automatically sync across devices or browsers.
+- Use the built-in backup/export controls to move data to another device.
