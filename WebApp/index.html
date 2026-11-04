@@ -402,7 +402,7 @@ $("q").oninput=lists;
 $("bl").addEventListener("click",e=>{const o=e.target.dataset.o,x=e.target.dataset.x;if(o)load(bills.find(b=>b.inv===o));if(x&&confirm("Delete "+x+"?")){bills=bills.filter(b=>b.inv!==x);store.set("fsw_bills",bills);lists()}});
 $("cl2").addEventListener("click",e=>{const c=e.target.dataset.c;if(c&&confirm("Delete "+c+"?")){delete custs[c];store.set("fsw_custs",custs);lists()}});
 function tab(t){document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));["new","saved","cust","prod"].forEach(x=>$("p-"+x).classList.toggle("hide",x!==t))}
-document.querySelector(".tabs").addEventListener("click",e=>{if(e.target.dataset.t){tab(e.target.dataset.t);lists()}});
+/* Navigation tabs are intentionally hidden; keep the tab panels available for existing app logic. */
 const DI={n:"Iron Door",h:"7308"};const bk=store.get("fsw_bank",{b:"Punjab National Bank",a:"6217002100001824",i:"PUNB0621700"});$("bk").value=bk.b;$("bka").value=bk.a;$("bki").value=bk.i;["bk","bka","bki"].forEach(k=>$(k).addEventListener("input",()=>store.set("fsw_bank",{b:$("bk").value,a:$("bka").value,i:$("bki").value})));if(!Object.keys(itemsDb).length){itemsDb={"Iron Doors":{h:"7308",r:""}};store.set("fsw_items",itemsDb)}
 const _l=lists;lists=function(){_l();
 $("cl2").innerHTML=Object.keys(custs).map(n=>`<div><span><b>${esc(n)}</b><br><small style="color:var(--mut)">${esc(custs[n].a)} · ${esc(custs[n].g)} · ${esc(custs[n].p||"")} · ${esc(custs[n].grp||"")}</small></span><span><button class="btn" data-e="${esc(n)}">Edit</button> <button class="btn" data-c="${esc(n)}">Delete</button></span></div>`).join("")||"No customers yet";
