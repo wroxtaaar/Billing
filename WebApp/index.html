@@ -31,20 +31,20 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 @media(max-width:600px){.it{grid-template-columns:1fr 1fr 1fr auto}.it input:first-child{grid-column:1/-1}}
 #wrap{overflow:hidden;background:#fff;padding:22px;width:838px;margin:auto}
 /* ---- bill ---- */
-.bill{width:794px;margin:auto;background:#fff;color:#2b2185;border:2px solid #1a1260;font:12.5px Arial,Helvetica,sans-serif;position:relative}
+.bill{width:794px;margin:auto;background:#fff;color:#2b2185;border:2px solid #1a1260;font:13.5px Arial,Helvetica,sans-serif;position:relative}
 .bill *{box-sizing:border-box}
-.bill .v{color:#111;font-weight:600}
+.bill .v{color:#c00000;font-weight:700;text-align:center}
 .bill .s{position:relative;border-bottom:2.5px solid #1a1260}
 .bill .a{position:absolute;white-space:nowrap}
 .bill .br{border-right:2.5px solid #1a1260}
-.bill .dl{flex:1;border-bottom:1.5px dotted #1a1260;min-height:14px;font-style:normal;white-space:nowrap;overflow:hidden}
-.bill .gs{display:flex;border:2px solid #1a1260;height:100%}.bill .gs span{flex:1;border-right:1.5px solid #1a1260;text-align:center;font:600 13px/33px Arial;color:#111}.bill .gs span:last-child{border:0}
+.bill .dl{flex:1;border-bottom:1.5px dotted #1a1260;min-height:16px;font-style:normal;white-space:nowrap;overflow:hidden;text-align:center;font-size:14px}
+.bill .gs{display:flex;border:2px solid #1a1260;height:100%}.bill .gs span{flex:1;border-right:1.5px solid #1a1260;text-align:center;font:700 14px/33px Arial;color:#c00000}.bill .gs span:last-child{border:0}
 .bill table{border-collapse:collapse;width:100%;table-layout:fixed}
 .bill th,.bill td{border:2px solid #1a1260;padding:2px 5px;vertical-align:top}
 .bill th{font-weight:600;text-align:center;height:61px;vertical-align:middle}
-.bill td{height:58px;color:#111;font-weight:600;font-size:14px}
+.bill td{height:58px;color:#c00000;font-weight:700;font-size:15px;text-align:center;vertical-align:middle}
 .bill th:first-child,.bill td:first-child{border-left:0}.bill th:last-child,.bill td:last-child{border-right:0}.bill tr:first-child th{border-top:0}.bill tr:last-child td{border-bottom:0}
-.bill .rt{text-align:right}
+.bill .rt{text-align:center}
 .bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
 @media print{@page{size:A4;margin:3mm}body{background:#fff}.ui{display:none!important}#wrap{zoom:.93!important;padding:0!important;background:none!important;width:794px!important}.bill{margin:0 auto}}
 </style><style>body.start .ui:not(#start),body.start #wrap{display:none}body:not(.start) #start{display:none}#start{padding-top:24px}#start .card{padding:16px}#start h3{font-size:18px;margin-bottom:12px}#start .g{grid-template-columns:1fr;gap:12px}#start .btn{width:100%;padding:12px}</style></head><body class="start">
@@ -343,7 +343,7 @@ row(t[2],`<span>GSTIN :</span><div style="flex:1;height:100%">${gsBox(p.g||"")}<
 row(t[3],`State : <span class="v">${esc(p.s)}</span>`)+
 `<div class="a" style="left:${cp}%;top:${t[3]}px">State Code: <span class="v">${esc(p.c)}</span></div>`}
 function rr(label,val,top){return`<div class="a" style="left:8px;right:6px;top:${top}px;display:flex;gap:4px;align-items:baseline"><span>${label}</span><i class="dl v">${esc(val)}</i></div>`}
-function T(l,v,h){return`<div class="tr" style="height:${h}px"><span style="width:70%;border-right:2px solid #1a1260;font-weight:600">${l}</span><span class="v" style="flex:1;justify-content:flex-end">${v}</span></div>`}
+function T(l,v,h){return`<div class="tr" style="height:${h}px"><span style="width:70%;border-right:2px solid #1a1260;font-weight:600">${l}</span><span class="v" style="flex:1;justify-content:center;text-align:center">${v}</span></div>`}
 function render(){const B=getBill(),C=calc(B),con=B.c||{n:"",a:"Same",g:"",s:"",c:""};
 const rows=Math.max(4,B.items.length);let tr="";
 for(let i=0;i<rows;i++){const it=B.items[i];const amt=it?(+it.q||0)*(+it.r||0):0;
