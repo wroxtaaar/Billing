@@ -439,13 +439,21 @@ async function makeInvoicePng(){
  try{
   if(document.fonts&&document.fonts.ready)await document.fonts.ready;
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const width=794,height=Math.ceil(bill.getBoundingClientRect().height||bill.scrollHeight);
+  const width=794;
+  // Measure every direct invoice section separately: the positioned invoice
+  // children and table can extend beyond the parent's reported client height.
+  const sections=Array.from(bill.children);
+  const height=Math.ceil(sections.reduce((total,section)=>{
+   const rect=section.getBoundingClientRect(),style=getComputedStyle(section);
+   return total+Math.max(section.offsetHeight,section.scrollHeight,rect.height)+
+    (parseFloat(style.marginTop)||0)+(parseFloat(style.marginBottom)||0);
+  },0));
   const blob=await renderer.toBlob(bill,{
    width,height,pixelRatio:2,
    backgroundColor:"#F6E8C8",
    cacheBust:true,
    skipAutoScale:true,
-   style:{width:width+"px",height:height+"px",margin:"0",transform:"none",zoom:"1",opacity:"1",visibility:"visible"}
+   style:{width:width+"px",height:height+"px",minHeight:height+"px",overflow:"visible",margin:"0",transform:"none",zoom:"1",opacity:"1",visibility:"visible"}
   });
   if(!blob||blob.size<5000)throw new Error("The generated image is blank or incomplete. Please try again.");
   return blob;
