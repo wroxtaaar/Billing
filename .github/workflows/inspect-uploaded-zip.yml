@@ -1,0 +1,24 @@
+name: Inspect uploaded project archive
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-uploaded-zip.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect archive without changing the project
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f Billing-main-updated.zip
+          echo "=== ZIP CONTENTS ==="
+          unzip -Z1 Billing-main-updated.zip
+          echo "=== TOP LEVEL ==="
+          unzip -Z1 Billing-main-updated.zip | awk -F/ 'NF {print $1}' | sort -u
+          echo "=== ARCHIVE VALIDATION ==="
+          unzip -t Billing-main-updated.zip
