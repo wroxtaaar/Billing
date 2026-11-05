@@ -448,10 +448,16 @@ async function makeInvoicePng(){
  }finally{host.remove()}
 }
 async function deliverInvoicePng(blob,filename){
- const file=new File([blob],filename,{type:"image/png"});
- if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-  await navigator.share({files:[file],title:"Invoice "+(val("inv")||""),text:"Fancy Steel Works invoice"});
-  return "shared";
+ if(typeof window.__nativeInvoiceShare==="function"){
+  await window.__nativeInvoiceShare(blob,filename);
+  return "native-share";
+ }
+ if(typeof File!=="undefined"&&navigator.share&&navigator.canShare){
+  const file=new File([blob],filename,{type:"image/png"});
+  if(navigator.canShare({files:[file]})){
+   try{await navigator.share({files:[file],title:"Invoice "+(val("inv")||""),text:"Fancy Steel Works invoice"});return "shared"}
+   catch(error){if(error&&error.name==="AbortError")throw error;console.warn("System file share unavailable; falling back to browser download",error)}
+  }
  }
  const url=URL.createObjectURL(blob),a=document.createElement("a");
  a.href=url;a.download=filename;a.rel="noopener";a.style.display="none";
@@ -535,5 +541,5 @@ $("snext").onclick=()=>{$("inv").value=val("s_inv");$("vn").value=val("s_vn").to
 
 const _ld=load;load=function(B){document.body.classList.remove("start");_ld(B)};
 showStart();refreshNextBillButton();
-</script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))</script>
+</script><script>if(window.Capacitor){const nativeShareScript=document.createElement("script");nativeShareScript.src="capacitor-native-share.js";nativeShareScript.async=true;document.head.appendChild(nativeShareScript)}</script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))</script>
 </body></html>
