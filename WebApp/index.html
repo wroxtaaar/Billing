@@ -87,7 +87,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
 <details class="card" style="display:none"><summary>Bank details printed on bill (edit if changed)</summary><div class="g" style="margin-top:8px"><div><label>Bank</label><input id="bk"></div><div><label>A/c No.</label><input id="bka"></div><div><label>IFSC</label><input id="bki"></div></div></details>
 <div class="row" style="margin:0 0 10px">
-<button class="btn pri" id="save">Save bill</button><button class="btn" id="print">Print / PDF</button><button class="btn" id="png">Download image</button><button class="btn" id="reset">New blank bill</button></div>
+<button class="btn" id="png">Download invoice</button><button class="btn pri" id="nextBill">Next bill →</button></div>
 </div>
 
 <div id="p-saved" class="hide"><div class="card"><input id="q" placeholder="Search by invoice no. or customer"><div class="list" id="bl" style="margin-top:8px"></div></div></div>
@@ -436,20 +436,29 @@ $("bs").addEventListener("input",()=>stateCode("bs","bc"));$("cs").addEventListe
 $("bn").addEventListener("input",()=>{const c=custs[val("bn")];if(c){$("ba").value=c.a;$("bg").value=c.g;$("bs").value=c.s;$("bc").value=c.c;$("ps").value=c.p||"";$("tx").value=c.t||"auto";render()}});
 $("same").onchange=()=>{$("cons").classList.toggle("hide",$("same").checked);render()};
 document.querySelectorAll(".ui input,.ui select").forEach(e=>e.addEventListener("input",render));
-function nextNo(){let m=0;bills.forEach(b=>{const n=parseInt((b.inv.match(/(\d+)\s*$/)||[])[1]||0);if(n>m)m=n});return"FSW/"+String(m+1).padStart(3,"0")}
+function incrementInvoiceNo(value){const m=String(value||"").match(/^(.*?)(\\d+)(\\s*)$/);return m?m[1]+String(Number(m[2])+1).padStart(m[2].length,"0")+m[3]:"FSW/001"}
+function nextNo(){let latest=store.get("fsw_last_invoice_no","");bills.forEach(b=>{const n=parseInt((b.inv.match(/(\\d+)\\s*$/)||[])[1]||0),old=parseInt((latest.match(/(\\d+)\\s*$/)||[])[1]||0);if(n>old)latest=b.inv});return latest?incrementInvoiceNo(latest):"FSW/001"}
 function blank(){items=[{...DI}];["bn","ba","bg","bs","bc","cn","ca","cg","cs","cc","tm","vn","ps","chg"].forEach(i=>$(i).value="");
 $("inv").value=nextNo();$("date").value=new Date().toISOString().slice(0,10);$("rev").value="";$("tx").value="auto";$("same").checked=true;$("cons").classList.add("hide");drawItems();render()}
 function load(B){const set=(i,v)=>$(i).value=v??"";set("inv",B.inv);set("date",B.date);set("rev",B.rev);set("tm",B.tm);set("vn",B.vn);set("ps",B.ps);set("tx",B.tx);set("chg",B.chg||"");
 set("bn",B.b.n);set("ba",B.b.a);set("bg",B.b.g);set("bs",B.b.s);set("bc",B.b.c);$("same").checked=B.same;$("cons").classList.toggle("hide",B.same);
 if(B.c){set("cn",B.c.n);set("ca",B.c.a);set("cg",B.c.g);set("cs",B.c.s);set("cc",B.c.c)}items=B.items.length?B.items.map(x=>({...x})):[{}];drawItems();render();tab("new");scrollTo(0,0)}
-$("save").onclick=()=>{const B=getBill();if(!B.inv||!B.b.n){alert("Enter invoice number and receiver name");return}
-B.total=calc(B).tot;const i=bills.findIndex(x=>x.inv===B.inv);i>=0?bills[i]=B:bills.push(B);store.set("fsw_bills",bills);
-if(!custs[B.b.n])custs[B.b.n]={a:B.b.a,g:B.b.g,s:B.b.s,c:B.b.c,p:B.ps,t:B.tx,grp:val("grp")};store.set("fsw_custs",custs);
-lists();drawItems();alert("Saved "+B.inv)};
-$("print").onclick=()=>print();
-$("png").onclick=()=>{if(!window.html2canvas){alert("Image export unavailable; use Print / PDF");return}const w=$("wrap"),z=w.style.zoom;w.style.zoom=1;
-html2canvas($("wrap"),{scale:2,backgroundColor:"#fff"}).then(c=>{w.style.zoom=z;$("ovi").src=c.toDataURL("image/png");$("ov").classList.remove("hide")}).catch(()=>{w.style.zoom=z;alert("Could not make the image")})};
-$("reset").onclick=blank;
+async function downloadInvoiceImage(element){if(!window.html2canvas){alert("Image export is unavailable. Please try again later.");return}const button=$("png"),old=button.textContent;button.disabled=true;button.textContent="Preparing…";try{const canvas=await html2canvas(element,{scale:2,backgroundColor:"#F6E8C8",useCORS:true});const filename="invoice-"+(val("inv")||"bill").replace(/[^a-z0-9_-]/gi,"_")+".png";const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));const url=blob?URL.createObjectURL(blob):canvas.toDataURL("image/png");const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();if(blob)setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(error){console.error(error);alert("Could not create the invoice image. Please try again.")}finally{button.disabled=false;button.textContent=old}}
+$("png").onclick=()=>downloadInvoiceImage($("bill"));
+$("nextBill").onclick=()=>{
+ const current=getBill();
+ if(!current.inv){alert("Enter an invoice number first");return}
+ const nextNumber=incrementInvoiceNo(current.inv);
+ const location=val("grp"),names=Object.keys(custs).filter(name=>custs[name].grp===location).sort();
+ if(names.length){
+   let index=names.indexOf(current.b.n);
+   const nextName=names[index<0?0:(index+1)%names.length],customer=custs[nextName]||{};
+   $("bn").value=nextName;$("ba").value=customer.a||"";$("bg").value=customer.g||"";$("bs").value=customer.s||"";$("bc").value=customer.c||"";
+   $("csel").value=nextName;
+ }
+ $("inv").value=nextNumber;store.set("fsw_last_invoice_no",nextNumber);
+ render();scrollTo({top:0,behavior:"smooth"});
+};
 function lists(){$("cl").innerHTML=Object.keys(custs).map(n=>`<option value="${esc(n)}">`).join("");
 const q=val("q").toLowerCase();$("bl").innerHTML=bills.slice().reverse().filter(b=>(b.inv+b.b.n).toLowerCase().includes(q)).map(b=>`<div><span><b>${esc(b.inv)}</b> · ${esc(b.b.n)}<br><small style="color:var(--mut)">${dmy(b.date)} · ₹${fmt(b.total)}</small></span><span><button class="btn" data-o="${esc(b.inv)}">Open</button> <button class="btn" data-x="${esc(b.inv)}">Delete</button></span></div>`).join("")||"No saved bills yet";
 $("cl2").innerHTML=Object.keys(custs).map(n=>`<div><span><b>${esc(n)}</b><br><small style="color:var(--mut)">${esc(custs[n].a)} ${esc(custs[n].g)}</small></span><button class="btn" data-c="${esc(n)}">Delete</button></div>`).join("")||"Customers are saved automatically when you save a bill"}
@@ -494,7 +503,7 @@ history.replaceState({fswScreen:"app"},"",location.pathname+location.search);
 history.pushState({fswScreen:"start"},"",location.pathname+location.search);
 addEventListener("popstate",e=>{if(e.state&&e.state.fswScreen==="start"){if(!document.body.classList.contains("start"))showStart();return;}history.pushState({fswScreen:"start"},"",location.pathname+location.search);if(!document.body.classList.contains("start"))showStart();});
 $("snext").onclick=()=>{$("inv").value=val("s_inv");$("vn").value=val("s_vn").toUpperCase();$("grp").value=$("s_grp").value;fillSel();if(val("s_csel")){$("csel").value=$("s_csel").value;$("csel").dispatchEvent(new Event("change"))}$("date").value=new Date().toISOString().slice(0,10);drawItems();document.body.classList.remove("start");history.pushState({fswScreen:"bill"},"",location.pathname+location.search);render();scrollTo(0,0)};
-$("reset").onclick=()=>{blank();showStart()};
+
 const _ld=load;load=function(B){document.body.classList.remove("start");_ld(B)};
 showStart();
 </script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))</script>
