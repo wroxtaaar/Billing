@@ -48,7 +48,7 @@ jobs:
       - name: Prepare Capacitor Android wrapper
         run: |
           npm init -y
-          npm install --save-exact @capacitor/core@7 @capacitor/android@7 @capacitor/app@7 @capacitor/filesystem@7 @capacitor/share@7
+          npm install --save-exact @capacitor/core@7 @capacitor/android@7 @capacitor/app@7
           npm install --save-dev --save-exact @capacitor/cli@7 esbuild
           mkdir -p www
           cp -R WebApp/. www/
@@ -62,6 +62,22 @@ jobs:
           }
           EOF
           npx cap add android
+          mkdir -p android/app/src/main/java/com/fancysteelworks/invoice
+          cp Android/SaveInvoicePlugin.java android/app/src/main/java/com/fancysteelworks/invoice/SaveInvoicePlugin.java
+          cat > android/app/src/main/java/com/fancysteelworks/invoice/MainActivity.java <<'EOF'
+          package com.fancysteelworks.invoice;
+
+          import android.os.Bundle;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              public void onCreate(Bundle savedInstanceState) {
+                  registerPlugin(SaveInvoicePlugin.class);
+                  super.onCreate(savedInstanceState);
+              }
+          }
+          EOF
           npx cap sync android
 
       - name: Build debug APK
