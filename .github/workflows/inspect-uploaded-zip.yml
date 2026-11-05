@@ -11,14 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect archive without changing the project
+      - name: Inspect uploaded project files
         shell: bash
         run: |
           set -euo pipefail
-          test -f Billing-main-updated.zip
-          echo "=== ZIP CONTENTS ==="
-          unzip -Z1 Billing-main-updated.zip
-          echo "=== TOP LEVEL ==="
-          unzip -Z1 Billing-main-updated.zip | awk -F/ 'NF {print $1}' | sort -u
-          echo "=== ARCHIVE VALIDATION ==="
-          unzip -t Billing-main-updated.zip
+          mkdir -p /tmp/updated
+          unzip -q Billing-main-updated.zip -d /tmp/updated
+          root=/tmp/updated/Billing-main
+          echo "=== ARCHIVE FILES ==="
+          find "$root" -type f -printf '%P (%s bytes)\n' | sort
+          echo "=== RENDER CONFIG ==="
+          cat "$root/render.yaml"
+          echo "=== ANDROID BUILD WORKFLOW ==="
+          cat "$root/.github/workflows/android-apk.yml"
+          echo "=== ANDROID NATIVE PLUGIN ==="
+          cat "$root/Android/SaveInvoicePlugin.java"
+          echo "=== ANDROID JS BRIDGE ==="
+          cat "$root/Android/native-share-entry.js"
+          echo "=== WEB APP EXPORT REFERENCES ==="
+          grep -n -E 'html-to-image|html2canvas|__nativeInvoiceSave|makeInvoicePng|downloadPreviewPng|Download invoice' "$root/WebApp/index.html" || true
+          echo "=== WEB APP SERVICE WORKER ==="
+          cat "$root/WebApp/sw.js"
