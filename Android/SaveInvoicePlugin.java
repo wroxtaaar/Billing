@@ -7,6 +7,7 @@ import android.provider.MediaStore;
 import android.widget.Toast;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
+import com.getcapacitor.JSObject;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.OutputStream;
@@ -53,8 +54,9 @@ public class SaveInvoicePlugin extends Plugin {
             getContext().getContentResolver().update(uri, complete, null, null);
 
             Toast.makeText(getContext(), "Invoice saved in Downloads/Fancy Steel Works", Toast.LENGTH_LONG).show();
-            com.getJSONObject().put("uri", uri.toString());
-            call.resolve(com.getJSONObject());
+            JSObject result = new JSObject();
+            result.put("uri", uri.toString());
+            call.resolve(result);
         } catch (Exception error) {
             if (uri != null) {
                 try { getContext().getContentResolver().delete(uri, null, null); } catch (Exception ignored) {}
