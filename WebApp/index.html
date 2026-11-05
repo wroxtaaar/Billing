@@ -104,6 +104,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <span id="zoomLabel">100%</span>
     <button class="btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
     <button class="btn" id="zoomFit" type="button">Fit width</button><button class="btn" id="zoomPage" type="button">Fit page</button>
+    <button class="btn" id="downloadPreviewPng" type="button">⬇ Download PNG</button>
     <button class="btn pri" id="closePreview" type="button">Close ✕</button>
   </div>
   <div id="previewViewport"><div id="previewStage"><div class="bill" id="previewBill"></div></div></div>
@@ -393,6 +394,23 @@ $("zoomIn").addEventListener("click",()=>setPreviewScale(previewScale+.15));
 $("zoomOut").addEventListener("click",()=>setPreviewScale(previewScale-.15));
 $("zoomFit").addEventListener("click",fitPreview);
 $("zoomPage").addEventListener("click",fitPreviewPage);
+$("downloadPreviewPng").addEventListener("click",async()=>{
+  const button=$("downloadPreviewPng"),bill=$("previewBill");
+  if(!window.html2canvas){alert("Image export unavailable; use Print / PDF");return}
+  const oldText=button.textContent;button.disabled=true;button.textContent="Preparing…";
+  try{
+    const canvas=await html2canvas(bill,{scale:2,backgroundColor:"#F6E8C8",useCORS:true});
+    const filename="invoice-"+(val("inv")||"bill").replace(/[^a-z0-9_-]/gi,"_")+".png";
+    const save=blob=>{
+      const url=URL.createObjectURL(blob),a=document.createElement("a");
+      a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+    };
+    if(canvas.toBlob)canvas.toBlob(blob=>{if(blob)save(blob);else{const a=document.createElement("a");a.href=canvas.toDataURL("image/png");a.download=filename;a.click()}}, "image/png");
+    else{const a=document.createElement("a");a.href=canvas.toDataURL("image/png");a.download=filename;a.click()}
+  }catch(error){console.error("Invoice PNG export failed",error);alert("Could not create the invoice image. Please try again.")}
+  finally{button.disabled=false;button.textContent=oldText}
+});
 // Two-finger pinch zoom, anchored to the point between the fingers.
 const previewViewport=$("previewViewport");
 let pinchDistance=0,pinchScale=1,pinchPoint=null;
