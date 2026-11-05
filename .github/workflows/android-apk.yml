@@ -1,5 +1,4 @@
 name: Build Android APK
-# Build from the refreshed Billing-main project source archive.
 
 on:
   workflow_dispatch:
@@ -20,7 +19,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build installable Android APK
+    name: Build permanently signed Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -42,7 +41,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          # The legacy 'tools' SDK package has been removed from Google's repositories.
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
           accept-android-sdk-licenses: true
 
@@ -81,16 +79,85 @@ jobs:
           EOF
           npx cap sync android
 
-      - name: Build debug APK
+      - name: Configure permanent APK signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/fancy-steel-release.jks
+          chmod 600 android/app/fancy-steel-release.jks
+
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("android/app/build.gradle")
+          if not path.exists():
+              raise SystemExit("Expected generated Gradle file android/app/build.gradle was not found")
+          text = path.read_text()
+
+          if not re.search(r"versionCode\\s+\\d+", text):
+              raise SystemExit("Could not find generated Android versionCode")
+          text = re.sub(
+              r"versionCode\\s+\\d+",
+              'versionCode ' + str(int(__import__("os").environ["GITHUB_RUN_NUMBER"])),
+              text,
+              count=1,
+          )
+          text = re.sub(
+              r"versionName\\s+['\"][^'\"]+['\"]",
+              'versionName "1.0.' + __import__("os").environ["GITHUB_RUN_NUMBER"] + '"',
+              text,
+              count=1,
+          )
+
+          signing = '''
+              signingConfigs {
+                  release {
+                      storeFile file("fancy-steel-release.jks")
+                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                      keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+                  }
+              }
+          '''
+          if "signingConfigs" not in text:
+              match = re.search(r"\\n\\s*buildTypes\\s*\\{", text)
+              if not match:
+                  raise SystemExit("Could not find Android buildTypes block")
+              text = text[:match.start()] + "\\n" + signing + text[match.start():]
+
+          release_match = re.search(r"(release\\s*\\{)", text)
+          if not release_match:
+              raise SystemExit("Could not find release build type")
+          insert_at = release_match.end()
+          text = text[:insert_at] + '\\n            signingConfig signingConfigs.release' + text[insert_at:]
+
+          path.write_text(text)
+          print("Configured permanent release signing and versionCode", __import__("os").environ["GITHUB_RUN_NUMBER"])
+          PY
+
+      - name: Build signed release APK
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+          ./gradlew --no-daemon assembleRelease
 
-      - name: Upload APK
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: fancy-steel-invoice-android-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: fancy-steel-invoice-android-release
+          path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30
