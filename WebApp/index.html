@@ -434,7 +434,7 @@ if(B.c){set("cn",B.c.n);set("ca",B.c.a);set("cg",B.c.g);set("cs",B.c.s);set("cc"
 async function makeInvoicePng(){
  if(!window.htmlToImage||typeof window.htmlToImage.toBlob!=="function")throw new Error("Invoice image renderer did not load. Check your internet connection and try again.");
  const host=document.createElement("div");
- host.style.cssText="position:fixed;left:0;top:0;width:838px;padding:22px;box-sizing:border-box;background:#F6E8C8;opacity:0.01;pointer-events:none;z-index:-1;overflow:visible";
+ host.style.cssText="position:fixed;left:-10000px;top:0;width:838px;padding:22px;box-sizing:border-box;background:#F6E8C8;opacity:1;visibility:visible;pointer-events:none;z-index:-1;overflow:visible";
  const cleanBill=$("bill").cloneNode(true);
  cleanBill.removeAttribute("id");
  cleanBill.style.cssText+=";width:794px;margin:0;zoom:1;transform:none;box-shadow:none";
