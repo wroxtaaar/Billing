@@ -1,4 +1,5 @@
 name: Build Android APK
+# Build from the refreshed Billing-main project source archive.
 
 on:
   workflow_dispatch:
