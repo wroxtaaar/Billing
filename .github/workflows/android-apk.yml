@@ -134,10 +134,13 @@ jobs:
                   raise SystemExit("Could not find Android buildTypes block")
               text = text[:match.start()] + "\n" + signing + text[match.start():]
 
-          release_match = re.search(r"(release\s*\{)", text)
+          build_types_match = re.search(r"buildTypes\s*\{", text)
+          if not build_types_match:
+              raise SystemExit("Could not find Android buildTypes block")
+          release_match = re.search(r"release\s*\{", text[build_types_match.end():])
           if not release_match:
-              raise SystemExit("Could not find release build type")
-          insert_at = release_match.end()
+              raise SystemExit("Could not find release build type inside buildTypes")
+          insert_at = build_types_match.end() + release_match.end()
           text = text[:insert_at] + '\n            signingConfig signingConfigs.release' + text[insert_at:]
 
           path.write_text(text)
