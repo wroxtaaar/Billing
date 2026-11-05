@@ -432,20 +432,27 @@ function load(B){const set=(i,v)=>$(i).value=v??"";set("inv",B.inv);set("date",B
 set("bn",B.b.n);set("ba",B.b.a);set("bg",B.b.g);set("bs",B.b.s);set("bc",B.b.c);$("same").checked=B.same;$("cons").classList.toggle("hide",B.same);
 if(B.c){set("cn",B.c.n);set("ca",B.c.a);set("cg",B.c.g);set("cs",B.c.s);set("cc",B.c.c)}items=B.items.length?B.items.map(x=>({...x})):[{}];drawItems();render();tab("new");scrollTo(0,0)}
 async function makeInvoicePng(){
- if(!window.htmlToImage||typeof window.htmlToImage.toBlob!=="function")throw new Error("Invoice image renderer did not load. Check your internet connection and try again.");
- const host=document.createElement("div");
- host.style.cssText="position:fixed;left:-10000px;top:0;width:838px;padding:22px;box-sizing:border-box;background:#F6E8C8;opacity:1;visibility:visible;pointer-events:none;z-index:-1;overflow:visible";
- const cleanBill=$("bill").cloneNode(true);
- cleanBill.removeAttribute("id");
- cleanBill.style.cssText+=";width:794px;margin:0;zoom:1;transform:none;box-shadow:none";
- host.appendChild(cleanBill);document.body.appendChild(host);
+ const renderer=window.htmlToImage;
+ if(!renderer||typeof renderer.toBlob!=="function")throw new Error("Invoice image renderer did not load. Refresh the app and try again.");
+ const bill=$("bill");
+ if(!bill||!bill.innerHTML.trim())throw new Error("The invoice is empty. Please generate the invoice preview first.");
  try{
   if(document.fonts&&document.fonts.ready)await document.fonts.ready;
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const blob=await window.htmlToImage.toBlob(host,{pixelRatio:2,backgroundColor:"#F6E8C8",cacheBust:true,skipAutoScale:true});
-  if(!blob)throw new Error("The invoice image could not be encoded.");
+  const width=794,height=Math.ceil(bill.getBoundingClientRect().height||bill.scrollHeight);
+  const blob=await renderer.toBlob(bill,{
+   width,height,pixelRatio:2,
+   backgroundColor:"#F6E8C8",
+   cacheBust:true,
+   skipAutoScale:true,
+   style:{width:width+"px",height:height+"px",margin:"0",transform:"none",zoom:"1",opacity:"1",visibility:"visible"}
+  });
+  if(!blob||blob.size<5000)throw new Error("The generated image is blank or incomplete. Please try again.");
   return blob;
- }finally{host.remove()}
+ }catch(error){
+  console.error("Invoice element rendering failed",error);
+  throw error;
+ }
 }
 async function deliverInvoicePng(blob,filename){
  if(typeof window.__nativeInvoiceSave==="function"){
