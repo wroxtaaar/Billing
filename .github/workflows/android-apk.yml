@@ -103,16 +103,16 @@ jobs:
               raise SystemExit("Expected generated Gradle file android/app/build.gradle was not found")
           text = path.read_text()
 
-          if not re.search(r"versionCode\\s+\\d+", text):
+          if not re.search(r"versionCode\s+\d+", text):
               raise SystemExit("Could not find generated Android versionCode")
           text = re.sub(
-              r"versionCode\\s+\\d+",
+              r"versionCode\s+\d+",
               'versionCode ' + str(int(__import__("os").environ["GITHUB_RUN_NUMBER"])),
               text,
               count=1,
           )
           text = re.sub(
-              r"versionName\\s+['\"][^'\"]+['\"]",
+              r"versionName\s+['\"][^'\"]+['\"]",
               'versionName "1.0.' + __import__("os").environ["GITHUB_RUN_NUMBER"] + '"',
               text,
               count=1,
@@ -129,16 +129,16 @@ jobs:
               }
           '''
           if "signingConfigs" not in text:
-              match = re.search(r"\\n\\s*buildTypes\\s*\\{", text)
+              match = re.search(r"\n\s*buildTypes\s*\{", text)
               if not match:
                   raise SystemExit("Could not find Android buildTypes block")
-              text = text[:match.start()] + "\\n" + signing + text[match.start():]
+              text = text[:match.start()] + "\n" + signing + text[match.start():]
 
-          release_match = re.search(r"(release\\s*\\{)", text)
+          release_match = re.search(r"(release\s*\{)", text)
           if not release_match:
               raise SystemExit("Could not find release build type")
           insert_at = release_match.end()
-          text = text[:insert_at] + '\\n            signingConfig signingConfigs.release' + text[insert_at:]
+          text = text[:insert_at] + '\n            signingConfig signingConfigs.release' + text[insert_at:]
 
           path.write_text(text)
           print("Configured permanent release signing and versionCode", __import__("os").environ["GITHUB_RUN_NUMBER"])
