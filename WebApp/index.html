@@ -49,7 +49,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
 @media print{@page{size:A4;margin:3mm}body{background:#fff}.ui{display:none!important}#wrap{zoom:.93!important;padding:0!important;background:none!important;width:794px!important}.bill{margin:0 auto}}
 
-.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 8px}.preview-heading h3{margin:0!important}#previewFull{position:fixed;inset:0;z-index:1000;background:#171522;display:flex;flex-direction:column;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px)}#previewFull.hide{display:none}.preview-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:#211e32;color:#fff}.preview-toolbar .btn{padding:8px 12px}.preview-toolbar #zoomLabel{min-width:48px;text-align:center;font-weight:700;color:#fff}#previewViewport{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 10px 28px;touch-action:pan-x pan-y; -webkit-overflow-scrolling:touch}#previewStage{width:794px;margin:0 auto;transform-origin:top left}#previewBill{width:794px;margin:0;background:#F6E8C8;box-shadow:0 4px 24px #0008}@media(max-width:600px){.preview-toolbar{gap:5px}.preview-toolbar .btn{padding:8px 10px;font-size:13px}}
+.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 8px}.preview-heading h3{margin:0!important}#previewFull{position:fixed;inset:0;z-index:1000;background:#171522;display:flex;flex-direction:column;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px)}#previewFull.hide{display:none}.preview-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:#211e32;color:#fff}.preview-toolbar .btn{padding:8px 12px}.preview-toolbar #zoomLabel{min-width:48px;text-align:center;font-weight:700;color:#fff}#previewViewport{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 10px 28px;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}#previewStage{width:838px;padding:22px;margin:0 auto;background:#F6E8C8;box-sizing:border-box;transform-origin:top left}#previewBill{width:794px;margin:0;background:#F6E8C8;box-shadow:0 4px 24px #0008}button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:600px){.preview-toolbar{gap:5px}.preview-toolbar .btn{padding:8px 10px;font-size:13px}}
 </style><style>body.start .ui:not(#start),body.start #wrap{display:none}body:not(.start) #start{display:none}#start{padding-top:24px}#start .card{padding:16px}#start h3{font-size:18px;margin-bottom:12px}#start .g{grid-template-columns:1fr;gap:12px}#start .btn{width:100%;padding:12px}</style></head><body class="start">
 <div id="start" class="ui"><div class="card"><h3>New bill</h3><div class="g"><div><label>Invoice No.</label><input id="s_inv"></div><div><label>Vehicle Number</label><input id="s_vn" style="text-transform:uppercase" autocomplete="off"></div><div><label>Location</label><select id="s_grp"></select></div><div><label>Business name</label><select id="s_csel"></select></div></div><h3 style="margin:18px 0 8px;font-size:15px">Items</h3><div id="s_items"></div><button class="btn" id="s_addi" style="margin-top:6px">+ Add item</button><div class="row"><button class="btn pri" id="snext">Next</button></div></div></div>
 <div class="ui">
@@ -379,13 +379,13 @@ $("bill").innerHTML=`<div class="s" style="height:86px"><svg width="100%" height
 <div class="s" style="height:78px;font-size:15.5px"><div class="a" style="left:12px;top:11px">Bank Details:</div><div class="a v" style="left:31.6%;top:8px">${esc($("bk").value)}</div><div class="a" style="left:12px;top:32px">Bank A/c No:</div><div class="a v" style="left:31.6%;top:30px">${esc($("bka").value)}</div><div class="a" style="left:12px;top:53px">IFSC:</div><div class="a v" style="left:31.6%;top:51px">${esc($("bki").value)}</div></div>
 <div style="flex:1;display:flex"><div class="br" style="width:75%;position:relative;padding:7px 8px;font-size:11px;line-height:13.5px"><b style="font-weight:600">Terms and Conditions :</b><br>(1) We shall not be responsible for the goods after given to the transport Co./Railway.<br>(2) Goods once sold shall not be taken back or exchanged.<br>(3) All Disputes Subject to Deoband Jurisdiction Only.<b class="a" style="right:8px;bottom:5px;font-weight:600">E.&amp;O.E.</b></div><div style="flex:1;position:relative"><span class="a" style="left:0;right:0;bottom:5px;text-align:center;font-size:8.5px">(Common Seal)</span></div></div></div>
 <div style="flex:1;position:relative">${T("Total Amount Before Tax",fmt(C.base-B.chg),28)}${T("Add: Charge if any",fmt(B.chg),32)}${T("Add: CGST@ &nbsp;9%",fmt(C.cg),33)}${T("Add: SGST@ &nbsp;9%",fmt(C.sg),35)}${T("Add: IGST @ &nbsp;18%",fmt(C.ig),39)}${T("Total Tax Amount GST",fmt(C.tax),33)}${T("Total Amount After Tax :",fmt(C.tot),44)}${T("GST Payable on Reverse Charge",B.rev==="Y"?fmt(C.tax):"",25)}
-<div style="position:relative;height:114px"><div class="a" style="left:0;right:0;top:4px;text-align:center;font-size:8.5px">Certified that the particulars given above are true and correct.</div><div class="a" style="left:0;right:0;top:19px;text-align:center;font:700 16px/20px Georgia,serif">For Fancy Steel Works</div><div class="a" style="left:0;right:0;bottom:8px;text-align:center;font:700 9.5px Arial">Authorised Signatory</div></div></div></div>`;fit()}
+<div style="position:relative;height:114px"><div class="a" style="left:0;right:0;top:4px;text-align:center;font-size:8.5px">Certified that the particulars given above are true and correct.</div><div class="a" style="left:0;right:0;top:19px;text-align:center;font:700 16px/20px Georgia,serif">For Fancy Steel Works</div><div class="a" style="left:0;right:0;bottom:8px;text-align:center;font:700 9.5px Arial">Authorised Signatory</div></div></div></div>`;fit();refreshNextBillButton()}
 function fit(){const w=$("wrap"),z=Math.min(1.5,innerWidth/838);w.style.zoom=z}
 
 let previewScale=1;
 function setPreviewScale(v){previewScale=Math.max(.35,Math.min(3,v));const stage=$("previewStage");stage.style.zoom=previewScale;$("zoomLabel").textContent=Math.round(previewScale*100)+"%"}
-function fitPreview(){const vp=$("previewViewport"),available=Math.max(280,vp.clientWidth-20);setPreviewScale(Math.min(1.5,available/794));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
-function fitPreviewPage(){const vp=$("previewViewport"),bill=$("previewBill"),availableW=Math.max(240,vp.clientWidth-20),availableH=Math.max(240,vp.clientHeight-42),scale=Math.min(availableW/794,availableH/Math.max(1,bill.offsetHeight));setPreviewScale(Math.min(1.5,scale));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
+function fitPreview(){const vp=$("previewViewport"),available=Math.max(280,vp.clientWidth-20);setPreviewScale(Math.min(1.5,available/838));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
+function fitPreviewPage(){const vp=$("previewViewport"),stage=$("previewStage"),availableW=Math.max(240,vp.clientWidth-20),availableH=Math.max(240,vp.clientHeight-42),scale=Math.min(availableW/838,availableH/Math.max(1,stage.offsetHeight));setPreviewScale(Math.min(1.5,scale));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
 function openPreview(){ $("previewBill").innerHTML=$("bill").innerHTML; $("previewFull").classList.remove("hide");document.body.style.overflow="hidden";requestAnimationFrame(fitPreview)}
 function closePreview(){ $("previewFull").classList.add("hide");document.body.style.overflow="";$("openPreview").focus()}
 $("openPreview").addEventListener("click",openPreview);
@@ -395,21 +395,24 @@ $("zoomOut").addEventListener("click",()=>setPreviewScale(previewScale-.15));
 $("zoomFit").addEventListener("click",fitPreview);
 $("zoomPage").addEventListener("click",fitPreviewPage);
 $("downloadPreviewPng").addEventListener("click",async()=>{
-  const button=$("downloadPreviewPng"),bill=$("previewBill");
-  if(!window.html2canvas){alert("Image export unavailable; use Print / PDF");return}
-  const oldText=button.textContent;button.disabled=true;button.textContent="Preparing…";
+  const button=$("downloadPreviewPng");
+  if(!window.html2canvas){alert("Image export is unavailable. Please try again later.");return}
+  const oldText=button.textContent,host=document.createElement("div");
+  button.disabled=true;button.textContent="Preparing…";
   try{
-    const canvas=await html2canvas(bill,{scale:2,backgroundColor:"#F6E8C8",useCORS:true});
+    host.style.cssText="position:fixed;left:-10000px;top:0;width:838px;padding:22px;box-sizing:border-box;background:#F6E8C8;z-index:-1;overflow:visible";
+    const cleanBill=$("bill").cloneNode(true);
+    cleanBill.removeAttribute("id");cleanBill.style.cssText+=";width:794px;margin:0;zoom:1;transform:none;box-shadow:none";
+    host.appendChild(cleanBill);document.body.appendChild(host);
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const canvas=await html2canvas(host,{scale:2,backgroundColor:"#F6E8C8",useCORS:true,logging:false,scrollX:0,scrollY:0});
     const filename="invoice-"+(val("inv")||"bill").replace(/[^a-z0-9_-]/gi,"_")+".png";
-    const save=blob=>{
-      const url=URL.createObjectURL(blob),a=document.createElement("a");
-      a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),1500);
-    };
-    if(canvas.toBlob)canvas.toBlob(blob=>{if(blob)save(blob);else{const a=document.createElement("a");a.href=canvas.toDataURL("image/png");a.download=filename;a.click()}}, "image/png");
-    else{const a=document.createElement("a");a.href=canvas.toDataURL("image/png");a.download=filename;a.click()}
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+    const url=blob?URL.createObjectURL(blob):canvas.toDataURL("image/png");
+    const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+    if(blob)setTimeout(()=>URL.revokeObjectURL(url),2000);
   }catch(error){console.error("Invoice PNG export failed",error);alert("Could not create the invoice image. Please try again.")}
-  finally{button.disabled=false;button.textContent=oldText}
+  finally{host.remove();button.disabled=false;button.textContent=oldText}
 });
 // Two-finger pinch zoom, anchored to the point between the fingers.
 const previewViewport=$("previewViewport");
@@ -445,18 +448,20 @@ set("bn",B.b.n);set("ba",B.b.a);set("bg",B.b.g);set("bs",B.b.s);set("bc",B.b.c);
 if(B.c){set("cn",B.c.n);set("ca",B.c.a);set("cg",B.c.g);set("cs",B.c.s);set("cc",B.c.c)}items=B.items.length?B.items.map(x=>({...x})):[{}];drawItems();render();tab("new");scrollTo(0,0)}
 async function downloadInvoiceImage(element){if(!window.html2canvas){alert("Image export is unavailable. Please try again later.");return}const button=$("png"),old=button.textContent;button.disabled=true;button.textContent="Preparing…";try{const canvas=await html2canvas(element,{scale:2,backgroundColor:"#F6E8C8",useCORS:true});const filename="invoice-"+(val("inv")||"bill").replace(/[^a-z0-9_-]/gi,"_")+".png";const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));const url=blob?URL.createObjectURL(blob):canvas.toDataURL("image/png");const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();if(blob)setTimeout(()=>URL.revokeObjectURL(url),1500)}catch(error){console.error(error);alert("Could not create the invoice image. Please try again.")}finally{button.disabled=false;button.textContent=old}}
 $("png").onclick=()=>downloadInvoiceImage($("bill"));
+function refreshNextBillButton(){
+ const location=val("grp"),business=val("bn"),names=location?Object.keys(custs).filter(name=>custs[name].grp===location).sort():[],index=names.indexOf(business);
+ const canAdvance=!!location&&!!business&&index>=0&&index<names.length-1;
+ $("nextBill").disabled=!canAdvance;
+ $("nextBill").title=canAdvance?"Move to the next business":"Choose a location and business; Next Bill is unavailable after the last business";
+}
 $("nextBill").onclick=()=>{
- const current=getBill();
+ const current=getBill(),location=val("grp"),names=location?Object.keys(custs).filter(name=>custs[name].grp===location).sort():[],index=names.indexOf(current.b.n);
+ if(!location||!current.b.n){alert("Choose a location and business name first.");refreshNextBillButton();return}
+ if(index<0||index>=names.length-1){refreshNextBillButton();return}
  if(!current.inv){alert("Enter an invoice number first");return}
- const nextNumber=incrementInvoiceNo(current.inv);
- const location=val("grp"),names=Object.keys(custs).filter(name=>custs[name].grp===location).sort();
- if(names.length){
-   let index=names.indexOf(current.b.n);
-   const nextName=names[index<0?0:(index+1)%names.length],customer=custs[nextName]||{};
-   $("bn").value=nextName;$("ba").value=customer.a||"";$("bg").value=customer.g||"";$("bs").value=customer.s||"";$("bc").value=customer.c||"";
-   $("csel").value=nextName;
- }
- $("inv").value=nextNumber;store.set("fsw_current_invoice_no",nextNumber);
+ const nextName=names[index+1],customer=custs[nextName]||{},nextNumber=incrementInvoiceNo(current.inv);
+ $("bn").value=nextName;$("ba").value=customer.a||"";$("bg").value=customer.g||"";$("bs").value=customer.s||"";$("bc").value=customer.c||"";
+ $("csel").value=nextName;$("inv").value=nextNumber;store.set("fsw_current_invoice_no",nextNumber);
  render();scrollTo({top:0,behavior:"smooth"});
 };
 function lists(){$("cl").innerHTML=Object.keys(custs).map(n=>`<option value="${esc(n)}">`).join("");
@@ -479,7 +484,7 @@ const L=$("grp").value,ns=L?Object.keys(custs).filter(k=>custs[k].grp===L).sort(
 $("csel").innerHTML='<option value="">'+(L?"— choose business name —":"choose location first")+'</option>'+ns.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");$("csel").disabled=!L;$("csel").value=ns.includes(cur)?cur:"";
 $("cl").innerHTML=(L?ns:Object.keys(custs).sort()).map(n=>`<option value="${esc(n)}">`).join("")}
 const _l2=lists;lists=function(){_l2();fillSel()};
-$("grp").onchange=fillSel;
+$("grp").onchange=()=>{fillSel();render()};
 $("csel").onchange=()=>{if(!$("csel").value)return;$("bn").value=$("csel").value;$("bn").dispatchEvent(new Event("input",{bubbles:true}))};
 $("ks").addEventListener("input",()=>stateCode("ks","kc"));
 $("ksave").onclick=()=>{const n=val("kn");if(!n){alert("Enter customer name");return}custs[n]={a:val("ka"),g:val("kg").toUpperCase(),s:val("ks"),c:val("kc"),p:val("kp"),t:val("kt"),grp:val("kgrp")};store.set("fsw_custs",custs);["kn","ka","kg","ks","kc","kp","kgrp"].forEach(i=>$(i).value="");$("kt").value="auto";lists()};
@@ -505,6 +510,6 @@ addEventListener("popstate",e=>{if(e.state&&e.state.fswScreen==="start"){if(!doc
 $("snext").onclick=()=>{$("inv").value=val("s_inv");$("vn").value=val("s_vn").toUpperCase();$("grp").value=$("s_grp").value;fillSel();if(val("s_csel")){$("csel").value=$("s_csel").value;$("csel").dispatchEvent(new Event("change"))}$("date").value=new Date().toISOString().slice(0,10);drawItems();document.body.classList.remove("start");history.pushState({fswScreen:"bill"},"",location.pathname+location.search);render();scrollTo(0,0)};
 
 const _ld=load;load=function(B){document.body.classList.remove("start");_ld(B)};
-showStart();
+showStart();refreshNextBillButton();
 </script><script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))</script>
 </body></html>
