@@ -350,15 +350,15 @@ function calc(B){const sub=B.items.reduce((s,i)=>s+(+i.q||0)*(+i.r||0),0),base=s
 let m=B.tx;if(m==="auto")m=(B.b.c||"09")==="09"?"intra":"inter";
 const cg=m==="intra"?base*.09:0,sg=cg,ig=m==="inter"?base*.18:0,tax=cg+sg+ig;return{sub,base,m,cg,sg,ig,tax,tot:base+tax}}
 function gsBox(g){return`<div class="gs">${[...Array(15)].map((_,i)=>`<span>${esc(g[i]||"")}</span>`).join("")}</div>`}
-function party(p,t,cp){const row=(top,inner,extra)=>`<div class="a" style="left:8px;right:8px;top:${top}px;${extra||""}">${inner}</div>`,fl="display:flex;gap:6px;align-items:baseline";
+function party(p,t,cp){const row=(top,inner,extra)=>`<div class="a" style="left:8px;right:8px;top:${top}px;${extra||""}">${inner}</div>`,fl="display:flex;gap:6px;align-items:baseline",address=String(p.a||""),addressFont=address.length<=38?15.5:13;
 return row(t[0],`<span>Name :</span><i class="dl v">${esc(p.n)}</i>`,fl)+
-row(t[1],`<span>Address</span><i class="dl v" style="white-space:normal;font-size:13px;line-height:16px;max-height:34px">${esc(p.a)}</i>`,fl)+
+row(t[1],`<span>Address</span><i class="dl v" style="white-space:normal;font-size:${addressFont}px;line-height:${addressFont>14?18:16}px;max-height:34px">${esc(address)}</i>`,fl)+
 row(t[2],`<span>GSTIN :</span><div style="flex:1;height:100%">${gsBox(p.g||"")}</div>`,"height:36px;display:flex;gap:6px;align-items:center")+
 row(t[3],`State : <span class="v">${esc(p.s)}</span>`)+
 `<div class="a" style="left:${cp}%;top:${t[3]}px">State Code: <span class="v">${esc(p.c)}</span></div>`}
 function rr(label,val,top){return`<div class="a" style="left:8px;right:6px;top:${top}px;display:flex;gap:4px;align-items:baseline"><span>${label}</span><i class="dl v">${esc(val)}</i></div>`}
 function T(l,v,h){return`<div class="tr" style="height:${h}px"><span style="width:70%;border-right:2px solid #1a1260;font-weight:600">${l}</span><span class="v" style="flex:1;justify-content:center;text-align:center">${v}</span></div>`}
-let entryColor=store.get("fsw_entry_color","blue")==="red"?"red":"blue";
+let entryColor=store.get("fsw_entry_color","red")==="blue"?"blue":"red";
 function applyEntryColor(){const red=entryColor==="red";$("bill").classList.toggle("entry-red",red);$("previewBill").classList.toggle("entry-red",red);$("entryBlue").classList.toggle("active",!red);$("entryRed").classList.toggle("active",red);$("entryBlue").setAttribute("aria-pressed",String(!red));$("entryRed").setAttribute("aria-pressed",String(red))}
 $("entryBlue").addEventListener("click",()=>{entryColor="blue";store.set("fsw_entry_color",entryColor);applyEntryColor()});
 $("entryRed").addEventListener("click",()=>{entryColor="red";store.set("fsw_entry_color",entryColor);applyEntryColor()});
