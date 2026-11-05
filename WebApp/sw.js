@@ -1,6 +1,6 @@
-const CACHE = "fsw-invoice-v2";
+const CACHE = "fsw-invoice-v3";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
-const LIB = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+const LIB = "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js";
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(async c => {
