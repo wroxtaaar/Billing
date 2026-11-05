@@ -49,7 +49,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
 @media print{@page{size:A4;margin:3mm}body{background:#fff}.ui{display:none!important}#wrap{zoom:.93!important;padding:0!important;background:none!important;width:794px!important}.bill{margin:0 auto}}
 
-.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 8px}.preview-heading h3{margin:0!important}#previewFull{position:fixed;inset:0;z-index:1000;background:#171522;display:flex;flex-direction:column;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px)}#previewFull.hide{display:none}.preview-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:#211e32;color:#fff}.preview-toolbar .btn{padding:8px 12px}.preview-toolbar #zoomLabel{min-width:48px;text-align:center;font-weight:700;color:#fff}#previewViewport{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 10px 28px;touch-action:pan-x pan-y}#previewStage{width:794px;margin:0 auto;transform-origin:top left}#previewBill{width:794px;margin:0;background:#F6E8C8;box-shadow:0 4px 24px #0008}@media(max-width:600px){.preview-toolbar{gap:5px}.preview-toolbar .btn{padding:8px 10px;font-size:13px}}
+.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 8px}.preview-heading h3{margin:0!important}#previewFull{position:fixed;inset:0;z-index:1000;background:#171522;display:flex;flex-direction:column;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px)}#previewFull.hide{display:none}.preview-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:#211e32;color:#fff}.preview-toolbar .btn{padding:8px 12px}.preview-toolbar #zoomLabel{min-width:48px;text-align:center;font-weight:700;color:#fff}#previewViewport{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 10px 28px;touch-action:pan-x pan-y; -webkit-overflow-scrolling:touch}#previewStage{width:794px;margin:0 auto;transform-origin:top left}#previewBill{width:794px;margin:0;background:#F6E8C8;box-shadow:0 4px 24px #0008}@media(max-width:600px){.preview-toolbar{gap:5px}.preview-toolbar .btn{padding:8px 10px;font-size:13px}}
 </style><style>body.start .ui:not(#start),body.start #wrap{display:none}body:not(.start) #start{display:none}#start{padding-top:24px}#start .card{padding:16px}#start h3{font-size:18px;margin-bottom:12px}#start .g{grid-template-columns:1fr;gap:12px}#start .btn{width:100%;padding:12px}</style></head><body class="start">
 <div id="start" class="ui"><div class="card"><h3>New bill</h3><div class="g"><div><label>Invoice No.</label><input id="s_inv"></div><div><label>Vehicle Number</label><input id="s_vn" style="text-transform:uppercase" autocomplete="off"></div><div><label>Location</label><select id="s_grp"></select></div><div><label>Business name</label><select id="s_csel"></select></div></div><h3 style="margin:18px 0 8px;font-size:15px">Items</h3><div id="s_items"></div><button class="btn" id="s_addi" style="margin-top:6px">+ Add item</button><div class="row"><button class="btn pri" id="snext">Next</button></div></div></div>
 <div class="ui">
@@ -103,7 +103,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="btn" id="zoomOut" type="button" aria-label="Zoom out">−</button>
     <span id="zoomLabel">100%</span>
     <button class="btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
-    <button class="btn" id="zoomFit" type="button">Fit width</button>
+    <button class="btn" id="zoomFit" type="button">Fit width</button><button class="btn" id="zoomPage" type="button">Fit page</button>
     <button class="btn pri" id="closePreview" type="button">Close ✕</button>
   </div>
   <div id="previewViewport"><div id="previewStage"><div class="bill" id="previewBill"></div></div></div>
@@ -382,15 +382,26 @@ $("bill").innerHTML=`<div class="s" style="height:86px"><svg width="100%" height
 function fit(){const w=$("wrap"),z=Math.min(1.5,innerWidth/838);w.style.zoom=z}
 
 let previewScale=1;
-function setPreviewScale(v){previewScale=Math.max(.35,Math.min(2.5,v));const stage=$("previewStage");stage.style.zoom=previewScale;$("zoomLabel").textContent=Math.round(previewScale*100)+"%"}
-function fitPreview(){const available=Math.max(280,$("previewViewport").clientWidth-20);setPreviewScale(Math.min(1.5,available/794));$("previewViewport").scrollTo({top:0,left:0,behavior:"smooth"})}
-function openPreview(){ $("previewBill").innerHTML=$("bill").innerHTML;$("previewFull").classList.remove("hide");document.body.style.overflow="hidden";requestAnimationFrame(fitPreview)}
+function setPreviewScale(v){previewScale=Math.max(.35,Math.min(3,v));const stage=$("previewStage");stage.style.zoom=previewScale;$("zoomLabel").textContent=Math.round(previewScale*100)+"%"}
+function fitPreview(){const vp=$("previewViewport"),available=Math.max(280,vp.clientWidth-20);setPreviewScale(Math.min(1.5,available/794));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
+function fitPreviewPage(){const vp=$("previewViewport"),bill=$("previewBill"),availableW=Math.max(240,vp.clientWidth-20),availableH=Math.max(240,vp.clientHeight-42),scale=Math.min(availableW/794,availableH/Math.max(1,bill.offsetHeight));setPreviewScale(Math.min(1.5,scale));vp.scrollTo({top:0,left:0,behavior:"smooth"})}
+function openPreview(){ $("previewBill").innerHTML=$("bill").innerHTML; $("previewFull").classList.remove("hide");document.body.style.overflow="hidden";requestAnimationFrame(fitPreview)}
 function closePreview(){ $("previewFull").classList.add("hide");document.body.style.overflow="";$("openPreview").focus()}
 $("openPreview").addEventListener("click",openPreview);
 $("closePreview").addEventListener("click",closePreview);
 $("zoomIn").addEventListener("click",()=>setPreviewScale(previewScale+.15));
 $("zoomOut").addEventListener("click",()=>setPreviewScale(previewScale-.15));
 $("zoomFit").addEventListener("click",fitPreview);
+$("zoomPage").addEventListener("click",fitPreviewPage);
+// Two-finger pinch zoom, anchored to the point between the fingers.
+const previewViewport=$("previewViewport");
+let pinchDistance=0,pinchScale=1,pinchPoint=null;
+const touchMidpoint=t=>({x:(t[0].clientX+t[1].clientX)/2,y:(t[0].clientY+t[1].clientY)/2});
+const touchGap=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+previewViewport.addEventListener("touchstart",e=>{if(e.touches.length===2){e.preventDefault();const mid=touchMidpoint(e.touches),vr=previewViewport.getBoundingClientRect(),sr=$("previewStage").getBoundingClientRect();pinchDistance=touchGap(e.touches);pinchScale=previewScale;pinchPoint={x:(mid.x-sr.left)/previewScale,y:(mid.y-sr.top)/previewScale,localX:mid.x-vr.left,localY:mid.y-vr.top};}},{passive:false});
+previewViewport.addEventListener("touchmove",e=>{if(e.touches.length===2&&pinchDistance&&pinchPoint){e.preventDefault();const mid=touchMidpoint(e.touches),vr=previewViewport.getBoundingClientRect(),scale=Math.max(.35,Math.min(3,pinchScale*touchGap(e.touches)/pinchDistance));setPreviewScale(scale);const sr=$("previewStage").getBoundingClientRect(),stageContentLeft=sr.left-vr.left+previewViewport.scrollLeft,stageContentTop=sr.top-vr.top+previewViewport.scrollTop;previewViewport.scrollLeft=Math.max(0,stageContentLeft+pinchPoint.x*scale-(mid.x-vr.left));previewViewport.scrollTop=Math.max(0,stageContentTop+pinchPoint.y*scale-(mid.y-vr.top));}},{passive:false});
+previewViewport.addEventListener("touchend",e=>{if(e.touches.length<2){pinchDistance=0;pinchPoint=null;}},{passive:true});
+previewViewport.addEventListener("touchcancel",()=>{pinchDistance=0;pinchPoint=null;},{passive:true});
 addEventListener("resize",()=>{if(!$("previewFull").classList.contains("hide"))fitPreview()});
 addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("previewFull").classList.contains("hide"))closePreview()});
 
