@@ -1,4 +1,4 @@
-const CACHE = "fsw-invoice-v3";
+const CACHE = "fsw-invoice-v4";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 const LIB = "https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js";
 
