@@ -48,6 +48,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .bill .rt{text-align:center}
 .bill .tr{display:flex;border-bottom:2px solid #1a1260}.bill .tr>span{padding:0 6px;display:flex;align-items:center}
 @media print{@page{size:A4;margin:3mm}body{background:#fff}.ui{display:none!important}#wrap{zoom:.93!important;padding:0!important;background:none!important;width:794px!important}.bill{margin:0 auto}}
+
+.preview-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 8px}.preview-heading h3{margin:0!important}#previewFull{position:fixed;inset:0;z-index:1000;background:#171522;display:flex;flex-direction:column;padding:env(safe-area-inset-top,8px) 0 env(safe-area-inset-bottom,8px)}#previewFull.hide{display:none}.preview-toolbar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px;background:#211e32;color:#fff}.preview-toolbar .btn{padding:8px 12px}.preview-toolbar #zoomLabel{min-width:48px;text-align:center;font-weight:700;color:#fff}#previewViewport{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 10px 28px;touch-action:pan-x pan-y}#previewStage{width:794px;margin:0 auto;transform-origin:top left}#previewBill{width:794px;margin:0;background:#F6E8C8;box-shadow:0 4px 24px #0008}@media(max-width:600px){.preview-toolbar{gap:5px}.preview-toolbar .btn{padding:8px 10px;font-size:13px}}
 </style><style>body.start .ui:not(#start),body.start #wrap{display:none}body:not(.start) #start{display:none}#start{padding-top:24px}#start .card{padding:16px}#start h3{font-size:18px;margin-bottom:12px}#start .g{grid-template-columns:1fr;gap:12px}#start .btn{width:100%;padding:12px}</style></head><body class="start">
 <div id="start" class="ui"><div class="card"><h3>New bill</h3><div class="g"><div><label>Invoice No.</label><input id="s_inv"></div><div><label>Vehicle Number</label><input id="s_vn" style="text-transform:uppercase" autocomplete="off"></div><div><label>Location</label><select id="s_grp"></select></div><div><label>Business name</label><select id="s_csel"></select></div></div><h3 style="margin:18px 0 8px;font-size:15px">Items</h3><div id="s_items"></div><button class="btn" id="s_addi" style="margin-top:6px">+ Add item</button><div class="row"><button class="btn pri" id="snext">Next</button></div></div></div>
 <div class="ui">
@@ -92,10 +94,20 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 <div id="p-cust" class="hide"><div class="card"><h3>Add / edit customer</h3><div class="g"><div><label>Name</label><input id="kn"></div><div><label>Address</label><input id="ka"></div><div><label>GSTIN</label><input id="kg" maxlength="15" style="text-transform:uppercase"></div><div><label>State</label><input id="ks" list="sl"></div><div><label>State Code</label><input id="kc" maxlength="2"></div><div><label>Place of Supply</label><input id="kp"></div><div><label>Location (e.g. Aliganj)</label><input id="kgrp" list="gl"></div><datalist id="gl"></datalist><div><label>Tax</label><select id="kt"><option value="auto">Auto (by state code)</option><option value="intra">CGST 9% + SGST 9%</option><option value="inter">IGST 18%</option></select></div></div><div class="row"><button class="btn pri" id="ksave">Save customer</button></div></div><div class="card"><div class="list" id="cl2"></div></div><div class="card"><h3>Import / export customers</h3><p style="margin:0 0 8px;color:var(--mut)">The built-in list loads automatically. Add or edit customers above; use this box to bulk-import, or to copy the current list out as JSON.</p><label>Choose a customers.json file</label><input type="file" id="cfile" accept=".json,application/json"><label style="margin-top:8px">or paste JSON</label><textarea id="cj" rows="4"></textarea><div class="row"><button class="btn" id="cimp">Import pasted JSON</button><button class="btn" id="cexp">Show current list as JSON</button></div></div><div class="card"><h3>Backup (customers, products, bills)</h3><textarea id="bj" rows="5"></textarea><div class="row"><button class="btn" id="bshow">Show backup</button><button class="btn" id="brest">Restore from text</button></div></div></div>
 <div id="p-prod" class="hide"><div class="card"><h3>Add / edit product</h3><div class="g"><div><label>Name</label><input id="pn"></div><div><label>HSN</label><input id="ph"></div><div><label>Default rate (optional)</label><input id="pr" type="number" step="any"></div></div><div class="row"><button class="btn pri" id="psave">Save product</button></div></div><div class="card"><div class="list" id="pl"></div></div></div>
 <datalist id="cl"></datalist><datalist id="sl"></datalist><datalist id="il"></datalist>
-<h3 style="margin:4px 2px;color:var(--ac)">Bill preview</h3>
+<div class="preview-heading"><h3 style="margin:4px 2px;color:var(--ac)">Bill preview</h3><button class="btn" id="openPreview" type="button">⛶ Full screen &amp; zoom</button></div>
 </div>
 <div id="ov" class="hide" style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9;overflow:auto;padding:12px;text-align:center"><button class="btn pri" onclick="this.parentNode.classList.add('hide')">Close</button><p style="color:#fff">Press and hold the image to save or share it</p><img id="ovi" style="max-width:100%;background:#fff"></div>
 <div id="wrap"><div class="bill" id="bill"></div></div>
+<div id="previewFull" class="hide" role="dialog" aria-modal="true" aria-label="Full screen invoice preview">
+  <div class="preview-toolbar">
+    <button class="btn" id="zoomOut" type="button" aria-label="Zoom out">−</button>
+    <span id="zoomLabel">100%</span>
+    <button class="btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
+    <button class="btn" id="zoomFit" type="button">Fit width</button>
+    <button class="btn pri" id="closePreview" type="button">Close ✕</button>
+  </div>
+  <div id="previewViewport"><div id="previewStage"><div class="bill" id="previewBill"></div></div></div>
+</div>
 
 <!-- BUILT-IN CUSTOMER LIST: one array per Location. Edit or add here, or send the updated list to Claude. -->
 <script id="seed" type="application/json">
@@ -368,6 +380,20 @@ $("bill").innerHTML=`<div class="s" style="height:86px"><svg width="100%" height
 <div style="flex:1;position:relative">${T("Total Amount Before Tax",fmt(C.base-B.chg),28)}${T("Add: Charge if any",fmt(B.chg),32)}${T("Add: CGST@ &nbsp;9%",fmt(C.cg),33)}${T("Add: SGST@ &nbsp;9%",fmt(C.sg),35)}${T("Add: IGST @ &nbsp;18%",fmt(C.ig),39)}${T("Total Tax Amount GST",fmt(C.tax),33)}${T("Total Amount After Tax :",fmt(C.tot),44)}${T("GST Payable on Reverse Charge",B.rev==="Y"?fmt(C.tax):"",25)}
 <div style="position:relative;height:114px"><div class="a" style="left:0;right:0;top:4px;text-align:center;font-size:8.5px">Certified that the particulars given above are true and correct.</div><div class="a" style="left:0;right:0;top:19px;text-align:center;font:700 16px/20px Georgia,serif">For Fancy Steel Works</div><div class="a" style="left:0;right:0;bottom:8px;text-align:center;font:700 9.5px Arial">Authorised Signatory</div></div></div></div>`;fit()}
 function fit(){const w=$("wrap"),z=Math.min(1.5,innerWidth/838);w.style.zoom=z}
+
+let previewScale=1;
+function setPreviewScale(v){previewScale=Math.max(.35,Math.min(2.5,v));const stage=$("previewStage");stage.style.zoom=previewScale;$("zoomLabel").textContent=Math.round(previewScale*100)+"%"}
+function fitPreview(){const available=Math.max(280,$("previewViewport").clientWidth-20);setPreviewScale(Math.min(1.5,available/794));$("previewViewport").scrollTo({top:0,left:0,behavior:"smooth"})}
+function openPreview(){ $("previewBill").innerHTML=$("bill").innerHTML;$("previewFull").classList.remove("hide");document.body.style.overflow="hidden";requestAnimationFrame(fitPreview)}
+function closePreview(){ $("previewFull").classList.add("hide");document.body.style.overflow="";$("openPreview").focus()}
+$("openPreview").addEventListener("click",openPreview);
+$("closePreview").addEventListener("click",closePreview);
+$("zoomIn").addEventListener("click",()=>setPreviewScale(previewScale+.15));
+$("zoomOut").addEventListener("click",()=>setPreviewScale(previewScale-.15));
+$("zoomFit").addEventListener("click",fitPreview);
+addEventListener("resize",()=>{if(!$("previewFull").classList.contains("hide"))fitPreview()});
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("previewFull").classList.contains("hide"))closePreview()});
+
 addEventListener("resize",fit);
 
 function drawItems(){drawItems0();$("s_items").innerHTML=$("items").innerHTML}function drawItems0(){$("items").innerHTML=items.map((it,i)=>`<div class="it"><select data-i="${i}" data-k="n"><option value="Iron Door" ${it.n==="Iron Door"?"selected":""}>Iron Door</option><option value="Iron + ACP Sheet Doors" ${it.n==="Iron + ACP Sheet Doors"?"selected":""}>Iron + ACP Sheet Doors</option></select><input placeholder="HSN" data-i="${i}" data-k="h" value="${esc(it.h)}"><input placeholder="Qty" type="number" step="any" data-i="${i}" data-k="q" value="${esc(it.q)}"><input placeholder="Rate" type="number" step="any" data-i="${i}" data-k="r" value="${esc(it.r)}"><button class="btn" data-d="${i}">✕</button></div>`).join("");
