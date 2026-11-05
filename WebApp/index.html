@@ -448,16 +448,9 @@ async function makeInvoicePng(){
  }finally{host.remove()}
 }
 async function deliverInvoicePng(blob,filename){
- if(typeof window.__nativeInvoiceShare==="function"){
-  await window.__nativeInvoiceShare(blob,filename);
-  return "native-share";
- }
- if(typeof File!=="undefined"&&navigator.share&&navigator.canShare){
-  const file=new File([blob],filename,{type:"image/png"});
-  if(navigator.canShare({files:[file]})){
-   try{await navigator.share({files:[file],title:"Invoice "+(val("inv")||""),text:"Fancy Steel Works invoice"});return "shared"}
-   catch(error){if(error&&error.name==="AbortError")throw error;console.warn("System file share unavailable; falling back to browser download",error)}
-  }
+ if(typeof window.__nativeInvoiceSave==="function"){
+  await window.__nativeInvoiceSave(blob,filename);
+  return "saved-to-downloads";
  }
  const url=URL.createObjectURL(blob),a=document.createElement("a");
  a.href=url;a.download=filename;a.rel="noopener";a.style.display="none";
