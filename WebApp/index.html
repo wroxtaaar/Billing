@@ -449,16 +449,18 @@ async function makeInvoicePng(){
   },0));
   const margin=22,border=3,width=794+margin*2+border*2,height=invoiceHeight+margin*2+border*2;
   frame=document.createElement("div");
-  frame.style.cssText="position:fixed;left:-10000px;top:0;width:"+width+"px;height:"+height+"px;padding:"+margin+"px;box-sizing:border-box;background:#F6E8C8;border:"+border+"px solid #2b2185;overflow:visible;opacity:1;visibility:visible";
+  // White paper surrounds the cream invoice; keep the original #bill id so
+  // all invoice-specific CSS (including its layout and borders) is retained.
+  frame.style.cssText="position:fixed;left:-10000px;top:0;width:"+width+"px;height:"+height+"px;padding:"+margin+"px;box-sizing:border-box;background:#ffffff;border:"+border+"px solid #2b2185;overflow:visible;opacity:1;visibility:visible";
   const invoice=bill.cloneNode(true);
-  invoice.removeAttribute("id");
-  invoice.style.cssText+=";display:block;width:794px;height:"+invoiceHeight+"px;min-height:"+invoiceHeight+"px;margin:0;box-sizing:border-box;overflow:visible;transform:none;zoom:1;opacity:1;visibility:visible";
+  invoice.id="bill";
+  invoice.style.cssText+=";display:block;width:794px;height:"+invoiceHeight+"px;min-height:"+invoiceHeight+"px;margin:0;box-sizing:border-box;overflow:visible;background:#F6E8C8;transform:none;zoom:1;opacity:1;visibility:visible";
   frame.appendChild(invoice);
   document.body.appendChild(frame);
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   const blob=await renderer.toBlob(frame,{
    width,height,pixelRatio:2,
-   backgroundColor:"#F6E8C8",
+   backgroundColor:"#ffffff",
    cacheBust:true,
    skipAutoScale:true,
    style:{width:width+"px",height:height+"px",margin:"0",transform:"none",zoom:"1",opacity:"1",visibility:"visible"}
