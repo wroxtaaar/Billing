@@ -436,8 +436,8 @@ $("bs").addEventListener("input",()=>stateCode("bs","bc"));$("cs").addEventListe
 $("bn").addEventListener("input",()=>{const c=custs[val("bn")];if(c){$("ba").value=c.a;$("bg").value=c.g;$("bs").value=c.s;$("bc").value=c.c;$("ps").value=c.p||"";$("tx").value=c.t||"auto";render()}});
 $("same").onchange=()=>{$("cons").classList.toggle("hide",$("same").checked);render()};
 document.querySelectorAll(".ui input,.ui select").forEach(e=>e.addEventListener("input",render));
-function incrementInvoiceNo(value){const m=String(value||"").match(/^(.*?)(\\d+)(\\s*)$/);return m?m[1]+String(Number(m[2])+1).padStart(m[2].length,"0")+m[3]:"FSW/001"}
-function nextNo(){let latest=store.get("fsw_last_invoice_no","");bills.forEach(b=>{const n=parseInt((b.inv.match(/(\\d+)\\s*$/)||[])[1]||0),old=parseInt((latest.match(/(\\d+)\\s*$/)||[])[1]||0);if(n>old)latest=b.inv});return latest?incrementInvoiceNo(latest):"FSW/001"}
+function incrementInvoiceNo(value){const m=String(value||"").match(/^(.*?)(\d+)(\s*)$/);return m?m[1]+String(Number(m[2])+1).padStart(m[2].length,"0")+m[3]:"FSW/001"}
+function nextNo(){let latest=store.get("fsw_last_invoice_no","");bills.forEach(b=>{const n=parseInt((b.inv.match(/(\d+)\s*$/)||[])[1]||0),old=parseInt((latest.match(/(\d+)\s*$/)||[])[1]||0);if(n>old)latest=b.inv});return latest?incrementInvoiceNo(latest):"FSW/001"}
 function blank(){items=[{...DI}];["bn","ba","bg","bs","bc","cn","ca","cg","cs","cc","tm","vn","ps","chg"].forEach(i=>$(i).value="");
 $("inv").value=nextNo();$("date").value=new Date().toISOString().slice(0,10);$("rev").value="";$("tx").value="auto";$("same").checked=true;$("cons").classList.add("hide");drawItems();render()}
 function load(B){const set=(i,v)=>$(i).value=v??"";set("inv",B.inv);set("date",B.date);set("rev",B.rev);set("tm",B.tm);set("vn",B.vn);set("ps",B.ps);set("tx",B.tx);set("chg",B.chg||"");
